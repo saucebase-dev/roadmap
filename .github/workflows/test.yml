@@ -1,0 +1,17 @@
+name: Roadmap Module Tests
+
+on:
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
+
+permissions:
+    contents: read
+
+jobs:
+    test:
+        uses: saucebase-dev/saucebase/.github/workflows/test-module.yml@main
+        with:
+            module: Roadmap
+            dependencies: saucebase/auth
