@@ -13,22 +13,6 @@ class RoadmapSuggestionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_cannot_access_create_page(): void
-    {
-        $response = $this->get(route('roadmap.create'));
-
-        $response->assertRedirect(route('login'));
-    }
-
-    public function test_authenticated_user_can_access_create_page(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get(route('roadmap.create'));
-
-        $response->assertOk();
-    }
-
     public function test_guest_cannot_submit_suggestion(): void
     {
         $response = $this->post(route('roadmap.store'), [

@@ -53,16 +53,6 @@ class RoadmapController
         ]);
     }
 
-    public function create(): Response
-    {
-        return Inertia::render('Roadmap::Create', [
-            'types' => collect(RoadmapType::cases())->map(fn (RoadmapType $t) => [
-                'value' => $t->value,
-                'label' => $t->getLabel(),
-            ]),
-        ]);
-    }
-
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
