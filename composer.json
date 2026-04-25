@@ -1,7 +1,9 @@
 {
     "name": "saucebase/roadmap",
-    "description": "",
+    "description": "Roadmap module",
     "type": "saucebase-module",
+    "license": "proprietary",
+    "version": "0.3.4",
     "authors": [
         {
             "name": "Saucebase",
@@ -10,20 +12,24 @@
     ],
     "extra": {
         "laravel": {
-            "providers": [],
+            "providers": [
+                "Modules\\Roadmap\\Providers\\RoadmapServiceProvider"
+            ],
             "aliases": {}
         }
     },
     "autoload": {
         "psr-4": {
-            "Modules\\Roadmap\\": "app/",
+            "Modules\\Roadmap\\": "src/",
             "Modules\\Roadmap\\Database\\Factories\\": "database/factories/",
-            "Modules\\Roadmap\\Database\\Seeders\\": "database/seeders/"
+            "Modules\\Roadmap\\Database\\Seeders\\": "database/seeders/",
+            "Modules\\Roadmap\\Tests\\Support\\": "tests/Support/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "Modules\\Roadmap\\Tests\\": "tests/"
         }
-    }
+    },
+    "minimum-stability": "stable"
 }
