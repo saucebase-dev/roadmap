@@ -8,18 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roadmap_votes', function (Blueprint $table) {
+        Schema::create('roadmap_comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('roadmap_item_id')->constrained('roadmap_items')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('type')->default('up');
-            $table->unique(['roadmap_item_id', 'user_id']);
+            $table->text('body');
+            $table->timestamp('hidden_at')->nullable();
+            $table->string('hidden_reason')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('roadmap_votes');
+        Schema::dropIfExists('roadmap_comments');
     }
 };

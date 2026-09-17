@@ -13,9 +13,12 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->string('status');
+            $table->string('status')->index();
             $table->string('type');
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->text('official_response')->nullable();
+            $table->timestamp('official_response_at')->nullable();
+            $table->foreignId('merged_into_id')->nullable()->constrained('roadmap_items')->nullOnDelete();
             $table->timestamps();
         });
     }

@@ -14,9 +14,9 @@ tasks:
 
     # ── Database ──────────────────────────────────────────────────
 
-    db:seed:
-        desc: Seed the Roadmap module database
-        cmd: '{{.APP}} php artisan modules:seed --module=roadmap'
+    db:seed:demo:
+        desc: Seed the Roadmap module with sample content
+        cmd: '{{.APP}} php artisan modules:seed --module=roadmap --demo'
 
     # ── Code Generation ────────────────────────────────────────────
 

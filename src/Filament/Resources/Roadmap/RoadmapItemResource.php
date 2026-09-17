@@ -20,6 +20,21 @@ class RoadmapItemResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Roadmap');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Roadmap item');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Roadmap');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return RoadmapItemForm::configure($schema);

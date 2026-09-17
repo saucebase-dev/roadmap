@@ -6,17 +6,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\Roadmap\Events\StatusChanged;
 use Modules\Roadmap\Notifications\RoadmapItemStatusChangedNotification;
 
-class NotifySubmitter implements ShouldQueue
+class NotifySubscribers implements ShouldQueue
 {
     public function handle(StatusChanged $event): void
     {
-        $item = $event->item;
-        $user = $item->user;
-
-        if (! $user) {
-            return;
+        foreach ($event->item->subscribers() as $subscriber) {
+            $subscriber->notify(new RoadmapItemStatusChangedNotification($event->item));
         }
-
-        $user->notify(new RoadmapItemStatusChangedNotification($item));
     }
 }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import {
     Dialog,
@@ -9,147 +8,94 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import AppLayout from '@/layouts/AppLayout.vue';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { PageHero } from '@/components/ui/saucebase';
+import SiteLayout from '@/layouts/SiteLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { computed, ref, watch } from 'vue';
-import { toast } from 'vue-sonner';
 
-import type { RoadmapItem } from '../types';
+import type {
+    RoadmapColumn,
+    RoadmapItem,
+    RoadmapTypeOption,
+} from '../../types';
+import ItemCard from '../components/ItemCard.vue';
+import { useVote } from '../composables/useVote';
 
+import IconArrowLeft from '~icons/heroicons/arrow-left';
+import IconChevronDown from '~icons/heroicons/chevron-down';
 import IconMap from '~icons/heroicons/map';
 import IconPlus from '~icons/heroicons/plus';
-import IconAltArrowDownBold from '~icons/solar/alt-arrow-down-bold';
-import IconAltArrowUpBold from '~icons/solar/alt-arrow-up-bold';
 
 const props = defineProps<{
     items: RoadmapItem[];
+    columns: RoadmapColumn[];
+    types: RoadmapTypeOption[];
     sort: string;
-    types: Array<{ value: string; label: string; color: string }>;
+    mine: boolean;
+    authenticated: boolean;
+    comments_enabled: boolean;
 }>();
 
-const title = 'Roadmap';
+const title = trans('Roadmap');
+const description = trans(
+    'See what we are building and vote on what matters to you.',
+);
 
-// ── Static constants ─────────────────────────────────────────────────────────
 const SORT_OPTIONS = [
-    { value: 'top', label: 'Top' },
-    { value: 'new', label: 'New' },
-    { value: 'old', label: 'Old' },
+    { value: 'trending', label: trans('Trending') },
+    { value: 'new', label: trans('Newest') },
+    { value: 'old', label: trans('Oldest') },
 ];
 
-const STATUS_CONFIG = [
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'approved', label: 'Planned' },
-    { value: 'completed', label: 'Completed' },
-] as const;
+const currentSortLabel = computed(
+    () =>
+        SORT_OPTIONS.find((option) => option.value === props.sort)?.label ??
+        SORT_OPTIONS[0].label,
+);
 
-// ── Sorting ──────────────────────────────────────────────────────────────────
-function changeSort(value: string) {
+/**
+ * Sorting and filtering only redraw the backlog, which sits at the bottom of
+ * the page, so the scroll position is kept.
+ */
+function reload(query: { sort?: string; mine?: boolean }) {
     router.get(
         route('roadmap.index'),
-        { sort: value },
-        {
-            preserveState: true,
-            replace: true,
-        },
+        { sort: props.sort, mine: props.mine, ...query },
+        { preserveState: true, preserveScroll: true, replace: true },
     );
 }
 
-// ── Optimistic local state ────────────────────────────────────────────────────
-const localItems = ref(props.items.map((i) => ({ ...i })));
+// Voting updates the card before the server answers, so the list is local state.
+const localItems = ref(props.items.map((item) => ({ ...item })));
 
 watch(
     () => props.items,
-    (newItems) => {
-        localItems.value = newItems.map((i) => ({ ...i }));
+    (items) => {
+        localItems.value = items.map((item) => ({ ...item }));
     },
     { deep: true },
 );
 
-// ── Status grouping ───────────────────────────────────────────────────────────
-const groups = computed(() =>
-    STATUS_CONFIG.map(({ value, label }) => ({
-        status: value,
-        label,
-        items: localItems.value
-            .filter((i) => i.status === value)
-            .sort((a, b) =>
-                props.sort === 'top' ? b.net_score - a.net_score : 0,
-            ),
-    })).filter((g) => g.items.length > 0),
+const board = computed(() =>
+    props.columns.map((column) => ({
+        ...column,
+        items: localItems.value.filter((item) => item.status === column.value),
+    })),
 );
 
-// ── Vote class helpers ────────────────────────────────────────────────────────
-function buttonClass(userVote: 'up' | 'down' | null, type: 'up' | 'down') {
-    if (userVote !== type)
-        return 'text-muted-foreground hover:bg-muted hover:text-foreground';
-    return type === 'up'
-        ? 'bg-secondary text-white'
-        : 'bg-destructive text-destructive-foreground';
-}
+const backlog = computed(() =>
+    localItems.value.filter((item) => item.status === 'backlog'),
+);
 
-function scoreClass(vote: 'up' | 'down' | null) {
-    if (vote === 'up') return 'bg-secondary text-white';
-    if (vote === 'down') return 'bg-destructive text-destructive-foreground';
-    return 'text-foreground';
-}
+const { vote, pending } = useVote(props.authenticated, ['items']);
 
-// ── Voting ────────────────────────────────────────────────────────────────────
-function showVoteToast(currentVote: 'up' | 'down' | null, type: 'up' | 'down') {
-    if (currentVote === type) return toast.info(trans('Vote removed'));
-    if (currentVote === null)
-        return type === 'up'
-            ? toast.success(trans('Upvoted!'))
-            : toast.info(trans('Downvoted'));
-    return type === 'up'
-        ? toast.success(trans('Changed to upvote'))
-        : toast.info(trans('Changed to downvote'));
-}
-
-function vote(item: RoadmapItem, type: 'up' | 'down') {
-    const local = localItems.value.find((i) => i.id === item.id);
-    if (!local) return;
-
-    const currentVote = local.user_vote;
-    const originalScore = local.net_score;
-    const delta = type === 'up' ? 1 : -1;
-
-    // Optimistic update
-    if (currentVote === type) {
-        local.user_vote = null;
-        local.net_score -= delta;
-    } else {
-        if (currentVote !== null)
-            local.net_score -= currentVote === 'up' ? 1 : -1;
-        local.net_score += delta;
-        local.user_vote = type;
-    }
-
-    router.post(
-        route('roadmap.vote', item.id),
-        { type },
-        {
-            preserveScroll: true,
-            only: ['items'],
-            onSuccess: () => showVoteToast(currentVote, type),
-            onError: () => {
-                local.net_score = originalScore;
-                local.user_vote = currentVote;
-            },
-        },
-    );
-}
-
-// ── Suggestion dialog ─────────────────────────────────────────────────────────
-const dialogOpen = ref(false);
-
-const form = useForm({
-    title: '',
-    description: '',
-    type: props.types[0]?.value ?? 'feature',
-});
-
-// ── Badge variant ─────────────────────────────────────────────────────────────
 const colorToVariant: Record<
     string,
     'default' | 'destructive' | 'secondary' | 'outline'
@@ -163,14 +109,27 @@ const colorToVariant: Record<
     gray: 'outline',
 };
 
-function typeBadgeVariant(
-    item: RoadmapItem,
-): 'default' | 'destructive' | 'secondary' | 'outline' {
-    const found = props.types.find((t) => t.value === item.type);
-    return colorToVariant[found?.color ?? 'primary'] ?? 'default';
+function typeVariant(item: RoadmapItem) {
+    const type = props.types.find((option) => option.value === item.type);
+
+    return colorToVariant[type?.color ?? 'primary'] ?? 'default';
 }
 
+const dialogOpen = ref(false);
+
+const form = useForm({
+    title: '',
+    description: '',
+    type: props.types[0]?.value ?? 'feature',
+});
+
 function openDialog() {
+    if (!props.authenticated) {
+        router.visit(route('login'));
+
+        return;
+    }
+
     form.reset();
     dialogOpen.value = true;
 }
@@ -183,195 +142,212 @@ function submitSuggestion() {
         },
     });
 }
-
-// ── Formatting ────────────────────────────────────────────────────────────────
-function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    });
-}
 </script>
 
 <template>
-    <AppLayout :title="title" :breadcrumbs="[{ title }]">
-        <div class="flex flex-1 flex-col gap-6 p-6 pt-2">
-            <div class="w-full max-w-3xl space-y-6">
-                <!-- Header -->
-                <div
-                    class="mt-6 mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    <SiteLayout
+        :title="title"
+        :description="description"
+        :canonical="route('roadmap.index')"
+    >
+        <PageHero
+            test-id="roadmap-hero"
+            :title="$t('Product Roadmap')"
+            :description="
+                $t(
+                    'Everything we are working on, in the open. Upvote the ideas you want next, follow along as they move from planned to shipped, and send us anything that is missing.',
+                )
+            "
+            :icon="IconMap"
+        >
+            <template #actions>
+                <Button
+                    data-testid="suggest-btn"
+                    variant="secondary"
+                    class="w-full sm:w-auto"
+                    @click="openDialog"
                 >
-                    <div class="flex items-center gap-3">
-                        <div class="bg-primary/10 text-primary rounded-xl p-4">
-                            <IconMap class="size-10" />
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold tracking-tight">
-                                {{ $t('Product Roadmap') }}
-                            </h1>
-                            <p class="text-muted-foreground text-sm">
-                                {{
-                                    $t(
-                                        'Vote on features and suggest new ideas.',
-                                    )
-                                }}
-                            </p>
-                        </div>
+                    <IconPlus class="size-5" />
+                    {{ $t('Submit feedback') }}
+                </Button>
+            </template>
+        </PageHero>
+
+        <div class="mx-auto w-full max-w-6xl px-8 py-16">
+            <!-- Sorting and filtering, at the top where they are easy to find -->
+            <div
+                v-if="localItems.length > 0 || mine"
+                class="mb-8 flex flex-wrap items-center gap-2"
+            >
+                <Button
+                    v-if="mine"
+                    data-testid="filter-mine-back"
+                    variant="ghost"
+                    class="gap-2"
+                    @click="reload({ mine: false })"
+                >
+                    <IconArrowLeft class="size-4" />
+                    {{ $t('Back to the roadmap') }}
+                </Button>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Button
+                            variant="outline"
+                            data-testid="sort-trigger"
+                            class="gap-2"
+                        >
+                            {{ $t('Sort by') }}: {{ currentSortLabel }}
+                            <IconChevronDown class="size-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                        <DropdownMenuItem
+                            v-for="option in SORT_OPTIONS"
+                            :key="option.value"
+                            :data-testid="`sort-${option.value}`"
+                            @select="reload({ sort: option.value })"
+                        >
+                            {{ option.label }}
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button
+                    v-if="authenticated && !mine"
+                    data-testid="filter-mine"
+                    variant="outline"
+                    class="ml-auto"
+                    @click="reload({ mine: true })"
+                >
+                    {{ $t('My feedback') }}
+                </Button>
+            </div>
+
+            <div
+                v-if="localItems.length === 0"
+                class="bg-muted/30 flex flex-col items-center justify-center gap-6 rounded-lg py-20 text-center"
+            >
+                <IconMap class="text-muted-foreground size-14" />
+                <p class="text-muted-foreground" data-testid="roadmap-empty">
+                    {{
+                        mine
+                            ? $t('You have not sent us any feedback yet.')
+                            : $t(
+                                  'No roadmap items yet. Be the first to suggest a feature!',
+                              )
+                    }}
+                </p>
+                <button
+                    type="button"
+                    data-testid="suggest-btn-empty"
+                    class="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground inline-flex items-center gap-2 rounded-md border px-4 py-1.5 text-sm transition-colors"
+                    @click="openDialog"
+                >
+                    <IconPlus class="size-5" />
+                    {{ $t('Submit feedback') }}
+                </button>
+            </div>
+
+            <!-- Own submissions: a plain list, because one person's items can sit
+                 in statuses the board has no column for, review included. -->
+            <div
+                v-else-if="mine"
+                data-testid="roadmap-mine"
+                class="grid grid-cols-1 gap-3 lg:grid-cols-2"
+            >
+                <ItemCard
+                    v-for="item in localItems"
+                    :key="item.id"
+                    :item="item"
+                    :type-variant="typeVariant(item)"
+                    :comments-enabled="comments_enabled"
+                    :vote-pending="pending.has(item.id)"
+                    show-status
+                    @vote="vote"
+                />
+            </div>
+
+            <template v-else>
+                <!-- One column per board status, stacked on small screens -->
+                <div
+                    data-testid="roadmap-board"
+                    class="grid grid-cols-1 gap-6 md:grid-cols-3"
+                >
+                    <section
+                        v-for="column in board"
+                        :key="column.value"
+                        :data-testid="`roadmap-column-${column.value}`"
+                        class="flex flex-col gap-3"
+                    >
+                        <h2
+                            class="text-muted-foreground flex items-center gap-2 px-1 text-xs font-semibold tracking-wider uppercase"
+                        >
+                            {{ column.label }}
+                            <span class="font-normal"
+                                >({{ column.items.length }})</span
+                            >
+                        </h2>
+
+                        <p
+                            v-if="column.items.length === 0"
+                            class="text-muted-foreground bg-muted/30 rounded-lg px-3 py-6 text-center text-sm"
+                        >
+                            {{ $t('Nothing here yet.') }}
+                        </p>
+
+                        <ItemCard
+                            v-for="item in column.items"
+                            :key="item.id"
+                            :item="item"
+                            :type-variant="typeVariant(item)"
+                            :comments-enabled="comments_enabled"
+                            :vote-pending="pending.has(item.id)"
+                            @vote="vote"
+                        />
+                    </section>
+                </div>
+
+                <!-- Accepted, but not scheduled yet -->
+                <section
+                    v-if="backlog.length > 0"
+                    data-testid="roadmap-backlog"
+                    class="mt-14"
+                >
+                    <div
+                        class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                        <h2 class="text-lg font-semibold">
+                            {{ $t('Backlog') }}
+                            <span class="text-muted-foreground font-normal"
+                                >({{ backlog.length }})</span
+                            >
+                        </h2>
                     </div>
 
-                    <Button
-                        data-testid="suggest-btn"
-                        class="w-full sm:w-auto"
-                        @click="openDialog"
-                    >
-                        <IconPlus class="size-5 text-white" />
-                        {{ $t('Submit feedback') }}
-                    </Button>
-                </div>
-
-                <!-- Sort controls -->
-                <div
-                    v-if="localItems.length > 0"
-                    class="flex items-center gap-1.5"
-                >
-                    <span class="text-muted-foreground mr-1 text-xs">{{
-                        $t('Sort:')
-                    }}</span>
-                    <button
-                        v-for="opt in SORT_OPTIONS"
-                        :key="opt.value"
-                        type="button"
-                        :class="[
-                            'rounded-md border px-3 py-1 text-xs font-medium transition-colors',
-                            sort === opt.value
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'hover:bg-accent border-border text-muted-foreground',
-                        ]"
-                        @click="changeSort(opt.value)"
-                    >
-                        {{ $t(opt.label) }}
-                    </button>
-                </div>
-
-                <!-- Empty state -->
-                <div
-                    v-if="localItems.length === 0"
-                    class="bg-muted/30 flex flex-col items-center justify-center gap-6 rounded-lg py-20 text-center"
-                >
-                    <IconMap class="text-muted-foreground size-14" />
-                    <p class="text-muted-foreground">
+                    <p class="text-muted-foreground mb-4 text-sm">
                         {{
                             $t(
-                                'No roadmap items yet. Be the first to suggest a feature!',
+                                'Ideas we accepted but have not scheduled. Votes help us pick what comes next.',
                             )
                         }}
                     </p>
-                    <button
-                        type="button"
-                        data-testid="suggest-btn-empty"
-                        class="border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-md border px-4 py-1.5 text-sm transition-colors"
-                        @click="openDialog"
-                    >
-                        {{ $t('Submit feedback') }}
-                    </button>
-                </div>
 
-                <!-- Grouped item list -->
-                <div
-                    v-for="group in groups"
-                    :key="group.status"
-                    class="space-y-2"
-                >
-                    <!-- Group header -->
-                    <p
-                        class="text-muted-foreground px-1 text-xs font-semibold tracking-wider uppercase"
-                    >
-                        {{ $t(group.label) }}
-                        <span class="ml-1 font-normal"
-                            >({{ group.items.length }})</span
-                        >
-                    </p>
-
-                    <!-- Items -->
-                    <TransitionGroup
-                        tag="div"
-                        class="flex flex-col gap-2"
-                        move-class="transition-transform duration-500 ease-out"
-                    >
-                        <div
-                            v-for="item in group.items"
+                    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                        <ItemCard
+                            v-for="item in backlog"
                             :key="item.id"
-                            class="bg-muted/50 hover:bg-muted/80 dark:bg-muted/20 dark:hover:bg-muted/40 relative flex items-stretch gap-0 overflow-hidden rounded border transition-colors"
-                        >
-                            <!-- Vote box -->
-                            <div
-                                :data-testid="`vote-box-${item.id}`"
-                                :data-user-vote="item.user_vote ?? 'none'"
-                                class="flex w-12 shrink-0 flex-col border-r"
-                            >
-                                <button
-                                    :data-testid="`upvote-btn-${item.id}`"
-                                    :class="[
-                                        'flex cursor-pointer items-center justify-center py-3 transition-colors',
-                                        buttonClass(item.user_vote, 'up'),
-                                    ]"
-                                    @click="vote(item, 'up')"
-                                >
-                                    <IconAltArrowUpBold class="size-5" />
-                                </button>
-                                <span
-                                    :data-testid="`vote-score-${item.id}`"
-                                    :class="[
-                                        'flex items-center justify-center py-2 text-sm font-semibold tabular-nums',
-                                        scoreClass(item.user_vote),
-                                    ]"
-                                >
-                                    {{ item.net_score }}
-                                </span>
-                                <button
-                                    :data-testid="`downvote-btn-${item.id}`"
-                                    :class="[
-                                        'flex cursor-pointer items-center justify-center py-3 transition-colors',
-                                        buttonClass(item.user_vote, 'down'),
-                                    ]"
-                                    @click="vote(item, 'down')"
-                                >
-                                    <IconAltArrowDownBold class="size-5" />
-                                </button>
-                            </div>
-
-                            <!-- Content -->
-                            <div
-                                class="flex flex-1 flex-col justify-center gap-1 px-4 py-3"
-                            >
-                                <p class="leading-snug font-semibold">
-                                    {{ item.title }}
-                                </p>
-                                <Badge
-                                    :variant="typeBadgeVariant(item)"
-                                    class="absolute top-0 right-0 rounded-none rounded-bl text-xs text-white"
-                                >
-                                    {{ item.type_label }}
-                                </Badge>
-                                <p
-                                    v-if="item.description"
-                                    class="line-clamp-1 text-sm"
-                                >
-                                    {{ item.description }}
-                                </p>
-                                <p class="text-muted-foreground mt-2 text-xs">
-                                    {{ $t('Created on') }}
-                                    {{ formatDate(item.created_at) }}
-                                </p>
-                            </div>
-                        </div>
-                    </TransitionGroup>
-                </div>
-            </div>
+                            :item="item"
+                            :type-variant="typeVariant(item)"
+                            :comments-enabled="comments_enabled"
+                            :vote-pending="pending.has(item.id)"
+                            @vote="vote"
+                        />
+                    </div>
+                </section>
+            </template>
         </div>
 
-        <!-- Suggestion dialog -->
         <Dialog v-model:open="dialogOpen">
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
@@ -386,30 +362,28 @@ function formatDate(dateStr: string): string {
                 </DialogHeader>
 
                 <form @submit.prevent="submitSuggestion" class="space-y-4">
-                    <!-- Type toggle -->
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium">{{
                             $t('Type')
                         }}</label>
                         <div class="flex gap-2">
                             <button
-                                v-for="t in types"
-                                :key="t.value"
+                                v-for="type in types"
+                                :key="type.value"
                                 type="button"
                                 :class="[
                                     'rounded-md border px-4 py-1.5 text-sm font-medium transition-colors',
-                                    form.type === t.value
+                                    form.type === type.value
                                         ? 'bg-primary text-primary-foreground border-primary'
                                         : 'hover:bg-accent border-border',
                                 ]"
-                                @click="form.type = t.value"
+                                @click="form.type = type.value"
                             >
-                                {{ t.label }}
+                                {{ type.label }}
                             </button>
                         </div>
                     </div>
 
-                    <!-- Title -->
                     <div class="space-y-1.5">
                         <label for="suggest-title" class="text-sm font-medium">
                             {{ $t('Title') }}
@@ -434,7 +408,6 @@ function formatDate(dateStr: string): string {
                         </p>
                     </div>
 
-                    <!-- Description -->
                     <div class="space-y-1.5">
                         <label
                             for="suggest-description"
@@ -487,5 +460,5 @@ function formatDate(dateStr: string): string {
                 </form>
             </DialogContent>
         </Dialog>
-    </AppLayout>
+    </SiteLayout>
 </template>
