@@ -4,7 +4,7 @@
 
 Public roadmap board with feature requests, upvotes, comments, team replies, and duplicate merging. Filament admin at `/admin` → Roadmap.
 
-Vue only so far: `resources/js/vue/`. There is no React implementation yet — add `resources/js/react/` mirroring it before marking the module as supporting both.
+Vue in `resources/js/vue/`, React in `resources/js/react/`. They mirror each other; change both.
 
 ---
 
@@ -34,7 +34,7 @@ Submitting an item also creates that person's vote, so nothing sits at zero.
 
 `RoadmapController::show()` returns `Inertia::modal(...)` when the request carries `Modal::HEADER_MODAL`, and an ordinary `Inertia::render(...)` otherwise. The board opens items in a right-hand slideover through `ModalLink`; a typed or shared link renders the full page, which is what search engines and the sitemap need.
 
-Decide on the header, never the referer: the package would otherwise treat any in-app link as "open me over the previous page". `ItemDetail.vue` holds the markup for both so they cannot drift.
+Decide on the header, never the referer: the package would otherwise treat any in-app link as "open me over the previous page". `ItemDetail` holds the markup for both so they cannot drift.
 
 Posting a comment inside the slideover redirects the page *behind* it, so the form calls `modal.reload()` when `useModal()` returns a modal, and `router.reload({ only: ['item'] })` when it does not.
 

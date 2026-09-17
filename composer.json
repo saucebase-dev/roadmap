@@ -16,6 +16,9 @@
         "Modules\\Roadmap\\Providers\\RoadmapServiceProvider"
       ],
       "aliases": {}
+    },
+    "saucebase": {
+      "frameworks": ["vue", "react"]
     }
   },
   "autoload": {
