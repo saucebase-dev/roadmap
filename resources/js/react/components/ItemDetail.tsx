@@ -1,10 +1,11 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useT } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { useModal } from '@inertiaui/modal-react';
+import { formatDate } from '@js/lib/dates';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -25,15 +26,6 @@ function initials(author: string): string {
     );
 }
 
-function formatDate(date: string): string {
-    return new Date(date).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: 'UTC',
-    });
-}
-
 export default function ItemDetail({
     item: initialItem,
     authenticated,
@@ -41,7 +33,7 @@ export default function ItemDetail({
     item: RoadmapItemDetail;
     authenticated: boolean;
 }) {
-    const t = useT();
+    const { t, locale } = useTranslation();
 
     // Voting updates the count before the server answers, so the item is local state.
     const [item, setItem] = useState(initialItem);
@@ -111,7 +103,7 @@ export default function ItemDetail({
                         </Badge>
                         <Badge variant="outline">{item.type_label}</Badge>
                         <span className="text-muted-foreground text-xs">
-                            {formatDate(item.created_at)}
+                            {formatDate(item.created_at, locale)}
                         </span>
                     </div>
 
@@ -138,7 +130,8 @@ export default function ItemDetail({
                         {item.official_response_at && (
                             <span className="text-muted-foreground font-normal">
                                 {' '}
-                                · {formatDate(item.official_response_at)}
+                                ·{' '}
+                                {formatDate(item.official_response_at, locale)}
                             </span>
                         )}
                     </p>
@@ -188,7 +181,10 @@ export default function ItemDetail({
                                             {comment.author}
                                         </span>
                                         <span className="text-muted-foreground text-xs">
-                                            {formatDate(comment.created_at)}
+                                            {formatDate(
+                                                comment.created_at,
+                                                locale,
+                                            )}
                                         </span>
                                     </div>
                                     <div

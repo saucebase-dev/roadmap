@@ -60,7 +60,7 @@ Mail lines are rendered as Markdown, so the item title is escaped before interpo
 
 ### Dates
 
-Comments and responses are sent as ISO strings and formatted with `timeZone: 'UTC'`, so the server render and every browser agree on the day.
+Comments and responses are sent as ISO strings and formatted with the app's `formatDate()` (`@js/lib/dates`), which formats in UTC, so the server render and every browser agree on the day.
 
 ---
 

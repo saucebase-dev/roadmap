@@ -2,6 +2,8 @@
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useLocalization } from '@/composables/useLocalization';
+import { formatDate } from '@js/lib/dates';
 import { useForm } from '@inertiajs/vue3';
 import { useModal } from '@inertiaui/modal-vue';
 import { trans } from 'laravel-vue-i18n';
@@ -76,14 +78,7 @@ function initials(author: string): string {
     );
 }
 
-function formatDate(date: string): string {
-    return new Date(date).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: 'UTC',
-    });
-}
+const { language } = useLocalization();
 </script>
 
 <template>
@@ -104,7 +99,7 @@ function formatDate(date: string): string {
                     </Badge>
                     <Badge variant="outline">{{ item.type_label }}</Badge>
                     <span class="text-muted-foreground text-xs">
-                        {{ formatDate(item.created_at) }}
+                        {{ formatDate(item.created_at, language) }}
                     </span>
                 </div>
 
@@ -133,7 +128,7 @@ function formatDate(date: string): string {
                     v-if="item.official_response_at"
                     class="text-muted-foreground font-normal"
                 >
-                    · {{ formatDate(item.official_response_at) }}
+                    · {{ formatDate(item.official_response_at, language) }}
                 </span>
             </p>
             <p class="whitespace-pre-line">{{ item.official_response }}</p>
@@ -176,7 +171,7 @@ function formatDate(date: string): string {
                                 {{ comment.author }}
                             </span>
                             <span class="text-muted-foreground text-xs">
-                                {{ formatDate(comment.created_at) }}
+                                {{ formatDate(comment.created_at, language) }}
                             </span>
                         </div>
                         <div
