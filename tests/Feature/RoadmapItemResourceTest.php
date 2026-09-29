@@ -2,7 +2,6 @@
 
 namespace Modules\Roadmap\Tests\Feature;
 
-use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -25,7 +24,7 @@ class RoadmapItemResourceTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->create(['email_verified_at' => now()]);
-        $this->admin->assignRole(Role::ADMIN);
+        $this->admin->assignRole('admin');
     }
 
     public function test_admin_can_list_roadmap_items(): void
