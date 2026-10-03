@@ -1,8 +1,6 @@
 import { registerIcon } from '@/lib/navigation';
 import IconMap from '~icons/heroicons/map';
 
-import '@modules/roadmap/resources/css/style.css';
-
 /**
  * Roadmap module setup
  * Called during app initialization before mounting
