@@ -1,30 +1,19 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { useModal } from '@inertiaui/modal-react';
 import { formatDate } from '@js/lib/dates';
+import { getInitials } from '@js/lib/initials';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { RoadmapItemDetail } from '../../types';
 import { useVote } from '../hooks/useVote';
 import VoteButton from './VoteButton';
-
-function initials(author: string): string {
-    return (
-        author
-            .split(/\s+/)
-            // Array.from splits by character, so an emoji or astral script keeps
-            // its whole glyph instead of half a surrogate pair.
-            .map((part) => Array.from(part)[0])
-            .join('')
-            .slice(0, 2)
-            .toUpperCase()
-    );
-}
 
 export default function ItemDetail({
     item: initialItem,
@@ -171,7 +160,7 @@ export default function ItemDetail({
                                                 'bg-primary text-primary-foreground',
                                         )}
                                     >
-                                        {initials(comment.author)}
+                                        {getInitials(comment.author)}
                                     </AvatarFallback>
                                 </Avatar>
 
@@ -209,7 +198,7 @@ export default function ItemDetail({
                             onSubmit={submitComment}
                             className="mt-8 space-y-2"
                         >
-                            <textarea
+                            <Textarea
                                 value={form.data.body}
                                 onChange={(event) =>
                                     form.setData('body', event.target.value)
@@ -218,7 +207,7 @@ export default function ItemDetail({
                                 placeholder={t('Add your thoughts…')}
                                 rows={3}
                                 maxLength={2000}
-                                className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full resize-none rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                                className="resize-none"
                             />
                             {form.errors.body && (
                                 <p className="text-destructive text-xs">

@@ -13,7 +13,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import { PageHero } from '@/components/ui/saucebase';
+import { Textarea } from '@/components/ui/textarea';
 import { useT } from '@/i18n';
 import SiteLayout from '@/layouts/SiteLayout';
 import { cn } from '@/lib/utils';
@@ -45,9 +47,6 @@ const colorToVariant: Record<
     info: 'secondary',
     gray: 'outline',
 };
-
-const inputClass =
-    'border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none';
 
 export default function Index({
     items,
@@ -379,7 +378,7 @@ export default function Index({
                                 {t('Title')}{' '}
                                 <span className="text-destructive">*</span>
                             </label>
-                            <input
+                            <Input
                                 id="suggest-title"
                                 data-testid="suggest-title"
                                 value={form.data.title}
@@ -391,7 +390,6 @@ export default function Index({
                                     'e.g. Dark mode, login bug, faster search…',
                                 )}
                                 maxLength={255}
-                                className={cn(inputClass, 'h-9 py-1')}
                             />
                             {form.errors.title && (
                                 <p className="text-destructive text-xs">
@@ -407,7 +405,7 @@ export default function Index({
                             >
                                 {t('Description')}
                             </label>
-                            <textarea
+                            <Textarea
                                 id="suggest-description"
                                 data-testid="suggest-description"
                                 value={form.data.description}
@@ -422,7 +420,7 @@ export default function Index({
                                 )}
                                 rows={3}
                                 maxLength={2000}
-                                className={cn(inputClass, 'resize-none py-2')}
+                                className="resize-none"
                             />
                             {form.errors.description && (
                                 <p className="text-destructive text-xs">
