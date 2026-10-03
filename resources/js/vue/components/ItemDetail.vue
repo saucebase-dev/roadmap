@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLocalization } from '@/composables/useLocalization';
 import { formatDate } from '@js/lib/dates';
+import { getInitials } from '@js/lib/initials';
 import { useForm } from '@inertiajs/vue3';
 import { useModal } from '@inertiaui/modal-vue';
 import { trans } from 'laravel-vue-i18n';
@@ -63,19 +65,6 @@ function submitComment() {
             }
         },
     });
-}
-
-function initials(author: string): string {
-    return (
-        author
-            .split(/\s+/)
-            // Array.from splits by character, so an emoji or astral script keeps
-            // its whole glyph instead of half a surrogate pair.
-            .map((part) => Array.from(part)[0])
-            .join('')
-            .slice(0, 2)
-            .toUpperCase()
-    );
 }
 
 const { language } = useLocalization();
@@ -161,7 +150,7 @@ const { language } = useLocalization();
                                     : '',
                             ]"
                         >
-                            {{ initials(comment.author) }}
+                            {{ getInitials(comment.author) }}
                         </AvatarFallback>
                     </Avatar>
 
@@ -194,13 +183,13 @@ const { language } = useLocalization();
                 @submit.prevent="submitComment"
                 class="mt-8 space-y-2"
             >
-                <textarea
+                <Textarea
                     v-model="form.body"
                     data-testid="comment-body"
                     :placeholder="$t('Add your thoughts…')"
                     rows="3"
                     maxlength="2000"
-                    class="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full resize-none rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                    class="resize-none"
                 />
                 <p v-if="form.errors.body" class="text-destructive text-xs">
                     {{ form.errors.body }}

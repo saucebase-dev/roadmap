@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Button from '@/components/ui/button/Button.vue';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Dialog,
     DialogContent,
@@ -389,7 +391,7 @@ function submitSuggestion() {
                             {{ $t('Title') }}
                             <span class="text-destructive">*</span>
                         </label>
-                        <input
+                        <Input
                             id="suggest-title"
                             data-testid="suggest-title"
                             v-model="form.title"
@@ -398,7 +400,6 @@ function submitSuggestion() {
                                 $t('e.g. Dark mode, login bug, faster search…')
                             "
                             maxlength="255"
-                            class="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
                         />
                         <p
                             v-if="form.errors.title"
@@ -415,7 +416,7 @@ function submitSuggestion() {
                         >
                             {{ $t('Description') }}
                         </label>
-                        <textarea
+                        <Textarea
                             id="suggest-description"
                             data-testid="suggest-description"
                             v-model="form.description"
@@ -426,7 +427,7 @@ function submitSuggestion() {
                             "
                             rows="3"
                             maxlength="2000"
-                            class="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full resize-none rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                            class="resize-none"
                         />
                         <p
                             v-if="form.errors.description"
