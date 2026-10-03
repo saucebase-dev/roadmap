@@ -2,10 +2,12 @@
 
 namespace Modules\Roadmap\Events;
 
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Modules\Roadmap\Models\RoadmapItem;
 
-class StatusChanged
+/** Dispatched once the change commits, so a rolled-back merge mails nobody. */
+class StatusChanged implements ShouldDispatchAfterCommit
 {
     use Dispatchable;
 

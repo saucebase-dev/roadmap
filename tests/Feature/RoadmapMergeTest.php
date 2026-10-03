@@ -4,6 +4,7 @@ namespace Modules\Roadmap\Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Roadmap\Actions\MergeItem;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Models\RoadmapItem;
 use Tests\TestCase;
@@ -23,7 +24,7 @@ class RoadmapMergeTest extends TestCase
             'body' => 'Same idea',
         ]);
 
-        $duplicate->mergeInto($target);
+        app(MergeItem::class)->handle($duplicate, $target);
 
         $this->assertSame(1, $target->votes()->count());
         $this->assertSame(1, $target->comments()->count());
@@ -40,7 +41,7 @@ class RoadmapMergeTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
 
         try {
-            $item->mergeInto($item);
+            app(MergeItem::class)->handle($item, $item);
         } finally {
             $this->assertSame(1, $item->votes()->count());
             $this->assertNull($item->fresh()->merged_into_id);
@@ -56,7 +57,7 @@ class RoadmapMergeTest extends TestCase
         $duplicate->votes()->create(['user_id' => $user->id]);
         $target->votes()->create(['user_id' => $user->id]);
 
-        $duplicate->mergeInto($target);
+        app(MergeItem::class)->handle($duplicate, $target);
 
         $this->assertSame(1, $target->votes()->count());
     }

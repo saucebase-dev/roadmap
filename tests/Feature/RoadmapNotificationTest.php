@@ -3,7 +3,9 @@
 namespace Modules\Roadmap\Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Modules\Roadmap\Enums\RoadmapStatus;
@@ -170,5 +172,29 @@ class RoadmapNotificationTest extends TestCase
         $item->update(['status' => RoadmapStatus::Shipped]);
 
         Notification::assertSentToTimes($user, RoadmapItemStatusChangedNotification::class, 3);
+    }
+
+    public function test_nobody_is_notified_of_a_status_change_that_rolled_back(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::UnderReview, 'user_id' => $user->id]);
+
+        try {
+            DB::transaction(function () use ($item): void {
+                $item->update(['status' => RoadmapStatus::Planned]);
+
+                throw new \RuntimeException('rolled back');
+            });
+        } catch (\RuntimeException) {
+        }
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_the_status_mail_is_queued(): void
+    {
+        $this->assertInstanceOf(ShouldQueue::class, new RoadmapItemStatusChangedNotification(RoadmapItem::factory()->make()));
     }
 }

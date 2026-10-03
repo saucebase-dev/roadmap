@@ -23,13 +23,15 @@ Public roadmap board with feature requests, upvotes, comments, team replies, and
 - **`publicStatuses()`** — what a visitor may read, vote on, and comment on: `Backlog`, `Planned`, `InProgress`, `Shipped`.
 - **`boardStatuses()`** — the three board columns: `Planned`, `InProgress`, `Shipped`. `Backlog` is public but deliberately off the board, listed underneath it.
 
-Every read and write path checks `publicStatuses()` and 404s otherwise. Adding a status means deciding which of those two lists it belongs to.
+Every read and write path checks `RoadmapItem::isPublic()` and 404s otherwise. Adding a status means deciding which of those two lists it belongs to.
 
 ### A Vote Row Is An Upvote
 
 There are no downvotes and no vote type column. A row in `roadmap_votes` means "this user wants this", and voting again deletes the row. The unique index on `(roadmap_item_id, user_id)` is what keeps one vote per person.
 
 Submitting an item also creates that person's vote, so nothing sits at zero.
+
+Writes go through `src/Actions/`: `SubmitSuggestion`, `ToggleVote` and `MergeItem`. `ToggleVote` takes no lock: a double click that inserts the same vote twice trips the unique index, which the action treats as already voted.
 
 ### Public Page, Optional Login
 
@@ -51,11 +53,11 @@ Moderation hides rather than deletes: `hidden_at` plus a private `hidden_reason`
 
 ### Merging Duplicates
 
-`RoadmapItem::mergeInto()` moves votes and comments to the target, drops votes from anyone who had voted on both (the unique index would reject them), then sets `merged_into_id` and closes the source. `comments()->reorder()` matters: the relation is ordered, and an ordered `UPDATE` is not portable.
+`Actions\MergeItem` moves votes and comments to the target, drops votes from anyone who had voted on both (the unique index would reject them), then sets `merged_into_id` and closes the source. `comments()->reorder()` matters: the relation is ordered, and an ordered `UPDATE` is not portable.
 
 ### Notifications Go To Everyone Waiting
 
-A status change notifies `subscribers()`: the submitter plus everyone who voted. Voting is how you subscribe.
+`StatusChanged` dispatches after commit, so a rolled-back merge mails nobody, and the mail itself is queued. A status change notifies `subscribers()`: the submitter plus everyone who voted. Voting is how you subscribe.
 
 Mail lines are rendered as Markdown, so the item title is escaped before interpolation — otherwise a title could put a working link into someone's inbox. HTML is already escaped by the mail view; Markdown link syntax is not.
 

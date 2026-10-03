@@ -12,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Roadmap\Actions\MergeItem;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Enums\RoadmapType;
 use Modules\Roadmap\Filament\Resources\RoadmapComments\RoadmapCommentResource;
@@ -99,7 +100,7 @@ class RoadmapItemsTable
             ->action(function (RoadmapItem $record, array $data): void {
                 $target = RoadmapItem::findOrFail($data['target_id']);
 
-                $record->mergeInto($target);
+                app(MergeItem::class)->handle($record, $target);
 
                 Notification::make()
                     ->success()

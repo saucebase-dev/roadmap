@@ -6,7 +6,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
 use InertiaUI\Modal\Modal;
-use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Models\RoadmapItem;
 use Modules\Roadmap\Settings\RoadmapSettings;
 
@@ -15,7 +14,7 @@ class RoadmapCommentController
     public function store(Request $request, RoadmapItem $item, RoadmapSettings $settings): RedirectResponse|Response|Modal
     {
         abort_unless($settings->comments_enabled, 404);
-        abort_unless(in_array($item->status, RoadmapStatus::publicStatuses()), 404);
+        abort_unless($item->isPublic(), 404);
 
         $validated = $request->validate([
             'body' => ['required', 'string', 'max:2000'],

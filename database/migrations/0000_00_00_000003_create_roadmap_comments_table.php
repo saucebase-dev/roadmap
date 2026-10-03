@@ -16,6 +16,9 @@ return new class extends Migration
             $table->timestamp('hidden_at')->nullable();
             $table->string('hidden_reason')->nullable();
             $table->timestamps();
+
+            $table->index('roadmap_item_id');
+            $table->index('user_id');
         });
     }
 

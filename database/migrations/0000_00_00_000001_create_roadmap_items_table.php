@@ -20,6 +20,9 @@ return new class extends Migration
             $table->timestamp('official_response_at')->nullable();
             $table->foreignId('merged_into_id')->nullable()->constrained('roadmap_items')->nullOnDelete();
             $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('merged_into_id');
         });
     }
 

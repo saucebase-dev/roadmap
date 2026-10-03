@@ -14,6 +14,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unique(['roadmap_item_id', 'user_id']);
             $table->timestamps();
+
+            $table->index('user_id');
         });
     }
 

@@ -3,11 +3,12 @@
 namespace Modules\Roadmap\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Roadmap\Models\RoadmapItem;
 
-class RoadmapItemStatusChangedNotification extends Notification
+class RoadmapItemStatusChangedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

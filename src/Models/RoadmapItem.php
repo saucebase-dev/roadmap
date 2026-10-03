@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Enums\RoadmapType;
 use Modules\Roadmap\Events\StatusChanged;
@@ -159,27 +157,10 @@ class RoadmapItem extends Model implements Sitemapable
             ->values();
     }
 
-    /**
-     * Move the votes and comments to another item, then close this one.
-     */
-    public function mergeInto(self $target): void
+    /** Whether visitors may read, vote on and comment on the item. */
+    public function isPublic(): bool
     {
-        if ($target->is($this)) {
-            throw new InvalidArgumentException('An item cannot be merged into itself.');
-        }
-
-        DB::transaction(function () use ($target): void {
-            $alreadyVoted = $target->votes()->pluck('user_id');
-
-            $this->votes()->whereIn('user_id', $alreadyVoted)->delete();
-            $this->votes()->update(['roadmap_item_id' => $target->getKey()]);
-            $this->comments()->reorder()->update(['roadmap_item_id' => $target->getKey()]);
-
-            $this->update([
-                'merged_into_id' => $target->getKey(),
-                'status' => RoadmapStatus::Closed,
-            ]);
-        });
+        return in_array($this->status, RoadmapStatus::publicStatuses(), true);
     }
 
     public function scopePublic(Builder $query): Builder
