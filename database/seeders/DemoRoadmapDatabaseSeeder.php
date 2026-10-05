@@ -7,11 +7,20 @@ use Illuminate\Database\Seeder;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Enums\RoadmapType;
 use Modules\Roadmap\Models\RoadmapItem;
+use Spatie\Permission\Models\Role;
 
 class DemoRoadmapDatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // A staff account that sees only this module's admin area.
+        Role::findOrCreate('roadmap admin')->syncPermissions(['access admin panel', 'manage roadmap']);
+        $staff = User::firstOrCreate(
+            ['email' => 'roadmap@saucebase.dev'],
+            ['name' => 'Roadmap Admin', 'password' => bcrypt('secretsauce')],
+        );
+        $staff->syncRoles('roadmap admin');
+
         $items = [
             [
                 'title' => 'Stripe usage-based billing',
