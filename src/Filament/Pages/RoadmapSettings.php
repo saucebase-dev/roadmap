@@ -18,6 +18,11 @@ class RoadmapSettings extends SettingsPage
 
     protected static string $settings = Settings::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage roadmap') ?? false;
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('Roadmap');

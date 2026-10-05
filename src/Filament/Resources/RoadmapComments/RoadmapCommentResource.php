@@ -23,6 +23,11 @@ class RoadmapCommentResource extends Resource
      */
     protected static bool $shouldRegisterNavigation = false;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage roadmap') ?? false;
+    }
+
     public static function getModelLabel(): string
     {
         return __('Comment');

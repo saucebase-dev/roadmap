@@ -20,6 +20,11 @@ class RoadmapItemResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage roadmap') ?? false;
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('Roadmap');

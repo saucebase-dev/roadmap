@@ -15,6 +15,10 @@ Public roadmap board with feature requests, upvotes, comments, team replies, and
 
 ## Non-Obvious Design
 
+### Admin Permission
+
+One permission, `manage roadmap`, covers the whole admin area: `RoadmapItemResource`, `RoadmapCommentResource` and the `RoadmapSettings` page check it in `canAccess()`. `access admin panel` alone only opens the panel. `Database\Seeders\DatabaseSeeder` creates it, granted to nobody; the app's roles seeder decides who gets it, and `admin` passes every check.
+
 ### Statuses Split Moderation From Stage
 
 `RoadmapStatus` mixes two jobs on purpose, and three helpers decide what shows where:
