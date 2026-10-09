@@ -72,7 +72,10 @@ test.describe('Roadmap', () => {
         await expect(page.getByText('Turned down')).toHaveCount(0);
     });
 
-    test('a guest who votes is sent to login', async ({ page, laravel }) => {
+    test('a guest who votes is asked to sign in over the board', async ({
+        page,
+        laravel,
+    }) => {
         const item = await laravel.factory(itemModel, {
             title: 'Guest vote',
             status: 'planned',
@@ -82,7 +85,11 @@ test.describe('Roadmap', () => {
         await page.goto('/roadmap');
         await page.getByTestId(`vote-btn-${item.id}`).click();
 
-        await expect(page).toHaveURL(/login/);
+        // The login modal is on by default, so the board stays behind it.
+        await expect(page.getByTestId('login-modal')).toBeVisible({
+            timeout: 15_000,
+        });
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 
     test('voting updates the count in place and toggles off again', async ({
@@ -211,8 +218,13 @@ test.describe('Roadmap', () => {
 
         await page.goto(`/roadmap/${item.slug}`);
 
-        await expect(page.getByTestId('comment-login')).toBeVisible();
         await expect(page.getByTestId('comment-body')).toHaveCount(0);
+
+        await page.getByTestId('comment-login').click();
+
+        await expect(page.getByTestId('login-modal')).toBeVisible({
+            timeout: 15_000,
+        });
     });
 
     test('a suggestion is submitted and waits for review under my feedback', async ({

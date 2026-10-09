@@ -1,3 +1,4 @@
+import { useAuth } from '@/composables/useAuth';
 import { router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
@@ -18,10 +19,11 @@ export function useVote(authenticated: boolean, only: string[]) {
     // A vote is a toggle, so two clicks racing each other would cancel out and
     // land whichever answer arrives last. One request per item at a time.
     const pending = ref(new Set<number>());
+    const { login } = useAuth();
 
     function vote(item: VotableItem) {
         if (!authenticated) {
-            router.visit(route('login'));
+            login();
 
             return;
         }

@@ -1,3 +1,4 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useT } from '@/i18n';
 import { router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
@@ -21,6 +22,7 @@ export function useVote(
     update: (id: number, vote: Omit<VotableItem, 'id'>) => void,
 ) {
     const t = useT();
+    const { login } = useAuth();
 
     // A vote is a toggle, so two clicks racing each other would cancel out and
     // land whichever answer arrives last. One request per item at a time.
@@ -39,7 +41,7 @@ export function useVote(
 
     function vote(item: VotableItem) {
         if (!authenticated) {
-            router.visit(route('login'));
+            login();
 
             return;
         }

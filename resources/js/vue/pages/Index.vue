@@ -17,6 +17,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PageHero } from '@/components/ui/saucebase';
+import { useAuth } from '@/composables/useAuth';
 import SiteLayout from '@/layouts/SiteLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
@@ -125,9 +126,11 @@ const form = useForm({
     type: props.types[0]?.value ?? 'feature',
 });
 
+const { login } = useAuth();
+
 function openDialog() {
     if (!props.authenticated) {
-        router.visit(route('login'));
+        login();
 
         return;
     }

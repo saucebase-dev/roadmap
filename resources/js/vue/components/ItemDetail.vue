@@ -3,6 +3,7 @@ import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/composables/useAuth';
 import { useLocalization } from '@/composables/useLocalization';
 import { formatDate } from '@js/lib/dates';
 import { getInitials } from '@js/lib/initials';
@@ -31,6 +32,7 @@ watch(
 );
 
 const { vote, pending } = useVote(props.authenticated, ['item']);
+const { login } = useAuth();
 
 const form = useForm({ body: '' });
 
@@ -213,6 +215,7 @@ const { language } = useLocalization();
                 <a
                     :href="route('login')"
                     data-testid="comment-login"
+                    @click.prevent="login()"
                     class="text-primary underline"
                     >{{ $t('Log in') }}</a
                 >

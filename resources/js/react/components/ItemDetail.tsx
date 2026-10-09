@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
@@ -32,6 +33,8 @@ export default function ItemDetail({
     const { vote, pending } = useVote(authenticated, ['item'], (_, change) =>
         setItem((current) => ({ ...current, ...change })),
     );
+
+    const { login } = useAuth();
 
     const form = useForm({ body: '' });
 
@@ -231,6 +234,10 @@ export default function ItemDetail({
                             <a
                                 href={route('login')}
                                 data-testid="comment-login"
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    login();
+                                }}
                                 className="text-primary underline"
                             >
                                 {t('Log in')}

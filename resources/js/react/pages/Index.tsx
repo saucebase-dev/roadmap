@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageHero } from '@/components/ui/saucebase';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/hooks/useAuth';
 import { useT } from '@/i18n';
 import SiteLayout from '@/layouts/SiteLayout';
 import { cn } from '@/lib/utils';
@@ -137,9 +138,11 @@ export default function Index({
         type: types[0]?.value ?? 'feature',
     });
 
+    const { login } = useAuth();
+
     function openDialog() {
         if (!authenticated) {
-            router.visit(route('login'));
+            login();
 
             return;
         }
