@@ -215,7 +215,7 @@ const { language } = useLocalization();
                 <a
                     :href="route('login')"
                     data-testid="comment-login"
-                    @click.prevent="login()"
+                    @click="login"
                     class="text-primary underline"
                     >{{ $t('Log in') }}</a
                 >

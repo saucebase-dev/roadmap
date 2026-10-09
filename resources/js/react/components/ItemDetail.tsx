@@ -234,10 +234,7 @@ export default function ItemDetail({
                             <a
                                 href={route('login')}
                                 data-testid="comment-login"
-                                onClick={(event) => {
-                                    event.preventDefault();
-                                    login();
-                                }}
+                                onClick={login}
                                 className="text-primary underline"
                             >
                                 {t('Log in')}
