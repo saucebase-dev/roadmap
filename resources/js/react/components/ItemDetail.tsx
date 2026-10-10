@@ -7,8 +7,8 @@ import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { useModal } from '@inertiaui/modal-react';
-import { formatDate } from '@js/lib/dates';
-import { getInitials } from '@js/lib/initials';
+import { formatDate } from '@saucebase/core/lib/dates';
+import { getInitials } from '@saucebase/core/lib/initials';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 

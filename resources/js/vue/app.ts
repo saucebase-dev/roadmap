@@ -1,4 +1,4 @@
-import { registerIcon } from '@/lib/navigation';
+import { registerIcon } from '@saucebase/vue/lib/navigation';
 import IconMap from '~icons/heroicons/map';
 
 export function setup() {
@@ -9,4 +9,4 @@ export function setup() {
  * Roadmap module after mount logic
  * Called after the app has been mounted
  */
-export function afterMount() { }
+export function afterMount() {}

@@ -1,4 +1,4 @@
-import { registerIcon } from '@/lib/navigation';
+import { registerIcon } from '@saucebase/react/lib/navigation';
 import IconMap from '~icons/heroicons/map';
 
 export function setup() {
