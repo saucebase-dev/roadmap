@@ -1,5 +1,5 @@
-import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
+import { useT } from '@saucebase/react/i18n';
 
 import IconAltArrowUpBold from '~icons/solar/alt-arrow-up-bold';
 

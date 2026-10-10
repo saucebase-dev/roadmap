@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import { useT } from '@/i18n';
 import { ModalLink } from '@inertiaui/modal-react';
+import { useT } from '@saucebase/react/i18n';
 
 import type { RoadmapItem } from '../../types';
 import VoteButton from './VoteButton';

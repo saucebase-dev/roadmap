@@ -2,13 +2,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/hooks/useAuth';
-import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { useModal } from '@inertiaui/modal-react';
 import { formatDate } from '@saucebase/core/lib/dates';
 import { getInitials } from '@saucebase/core/lib/initials';
+import { useAuth } from '@saucebase/react/hooks/useAuth';
+import { useTranslation } from '@saucebase/react/i18n';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 

@@ -1,6 +1,6 @@
-import { useAuth } from '@/hooks/useAuth';
-import { useT } from '@/i18n';
 import { router } from '@inertiajs/react';
+import { useAuth } from '@saucebase/react/hooks/useAuth';
+import { useT } from '@saucebase/react/i18n';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 

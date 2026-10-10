@@ -17,7 +17,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PageHero } from '@/components/ui/saucebase';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@saucebase/vue/composables/useAuth';
 import SiteLayout from '@/layouts/SiteLayout.vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';

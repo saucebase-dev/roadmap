@@ -16,11 +16,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageHero } from '@/components/ui/saucebase';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/hooks/useAuth';
-import { useT } from '@/i18n';
 import SiteLayout from '@/layouts/SiteLayout';
 import { cn } from '@/lib/utils';
 import { router, useForm } from '@inertiajs/react';
+import { useAuth } from '@saucebase/react/hooks/useAuth';
+import { useT } from '@saucebase/react/i18n';
 import { useEffect, useState } from 'react';
 
 import type {

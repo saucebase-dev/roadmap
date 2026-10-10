@@ -1,7 +1,7 @@
-import { useT } from '@/i18n';
 import SiteLayout from '@/layouts/SiteLayout';
 import { Link } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
+import { useT } from '@saucebase/react/i18n';
 
 import type { RoadmapItemDetail } from '../../types';
 import ItemDetail from '../components/ItemDetail';

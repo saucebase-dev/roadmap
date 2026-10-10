@@ -1,5 +1,5 @@
-import { useAuth } from '@/composables/useAuth';
 import { router } from '@inertiajs/vue3';
+import { useAuth } from '@saucebase/vue/composables/useAuth';
 import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
