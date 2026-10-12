@@ -4,6 +4,9 @@
   "type": "saucebase-module",
   "license": "proprietary",
   "version": "v2.0.0",
+  "require": {
+    "saucebase/core": "^1.4"
+  },
   "authors": [
     {
       "name": "Saucebase",
