@@ -207,6 +207,7 @@ export default function ItemDetail({
                                     form.setData('body', event.target.value)
                                 }
                                 data-testid="comment-body"
+                                aria-label={t('Comment')}
                                 placeholder={t('Add your thoughts…')}
                                 rows={3}
                                 maxLength={2000}

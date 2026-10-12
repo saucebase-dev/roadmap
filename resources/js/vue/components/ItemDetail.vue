@@ -188,6 +188,7 @@ const { language } = useLocalization();
                 <Textarea
                     v-model="form.body"
                     data-testid="comment-body"
+                    :aria-label="$t('Comment')"
                     :placeholder="$t('Add your thoughts…')"
                     rows="3"
                     maxlength="2000"
