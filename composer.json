@@ -5,7 +5,7 @@
   "license": "proprietary",
   "version": "v2.0.1",
   "require": {
-    "saucebase/core": "^1.4"
+    "saucebase/core": "^1.6"
   },
   "authors": [
     {
