@@ -1,7 +1,7 @@
 <?php
 
-use App\Facades\Navigation;
-use App\Navigation\Section;
+use Saucebase\Core\Facades\Navigation;
+use Saucebase\Core\Navigation\Section;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,12 +15,19 @@ use App\Navigation\Section;
 
 Navigation::add('Roadmap', fn () => route('roadmap.index'), function (Section $section) {
     $section->attributes([
-        'group' => 'main',
+        'group' => 'landing',
         'slug' => 'roadmap',
         'icon' => 'roadmap',
-        'badge' => [
-            'content' => 'New',
-            'variant' => 'info',
-        ],
+        'order' => 2,
+    ]);
+});
+
+Navigation::add('Roadmap', fn () => route('roadmap.index'), function (Section $section) {
+    $section->attributes([
+        'group' => 'secondary',
+        'slug' => 'roadmap',
+        'icon' => 'roadmap',
+        // Just above "Star us on Github", which sits at 0.
+        'order' => -1,
     ]);
 });

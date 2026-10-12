@@ -3,7 +3,9 @@
 namespace Modules\Roadmap\Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Modules\Roadmap\Enums\RoadmapStatus;
@@ -20,9 +22,9 @@ class RoadmapNotificationTest extends TestCase
     {
         Event::fake([StatusChanged::class]);
 
-        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::PendingApproval]);
+        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::UnderReview]);
 
-        $item->update(['status' => RoadmapStatus::Approved]);
+        $item->update(['status' => RoadmapStatus::Planned]);
 
         Event::assertDispatched(StatusChanged::class, function ($event) use ($item) {
             return $event->item->is($item);
@@ -33,7 +35,7 @@ class RoadmapNotificationTest extends TestCase
     {
         Event::fake([StatusChanged::class]);
 
-        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::Approved]);
+        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::Planned]);
 
         $item->update(['title' => 'Updated title only']);
 
@@ -46,13 +48,47 @@ class RoadmapNotificationTest extends TestCase
 
         $user = User::factory()->create();
         $item = RoadmapItem::factory()->create([
-            'status' => RoadmapStatus::PendingApproval,
+            'status' => RoadmapStatus::UnderReview,
             'user_id' => $user->id,
         ]);
 
-        $item->update(['status' => RoadmapStatus::Approved]);
+        $item->update(['status' => RoadmapStatus::Planned]);
 
         Notification::assertSentTo($user, RoadmapItemStatusChangedNotification::class);
+    }
+
+    public function test_voters_are_notified_when_status_changes(): void
+    {
+        Notification::fake();
+
+        $submitter = User::factory()->create();
+        $voter = User::factory()->create();
+        $bystander = User::factory()->create();
+
+        $item = RoadmapItem::factory()->create([
+            'status' => RoadmapStatus::UnderReview,
+            'user_id' => $submitter->id,
+        ]);
+        $item->votes()->create(['user_id' => $voter->id]);
+
+        $item->update(['status' => RoadmapStatus::Planned]);
+
+        Notification::assertSentTo([$submitter, $voter], RoadmapItemStatusChangedNotification::class);
+        Notification::assertNotSentTo($bystander, RoadmapItemStatusChangedNotification::class);
+    }
+
+    public function test_a_title_cannot_smuggle_a_link_into_the_email(): void
+    {
+        $user = User::factory()->create();
+        $item = RoadmapItem::factory()->create([
+            'status' => RoadmapStatus::UnderReview,
+            'user_id' => $user->id,
+            'title' => 'Evil [click me](https://evil.test)',
+        ]);
+
+        $mail = (new RoadmapItemStatusChangedNotification($item))->toMail($user);
+
+        $this->assertStringNotContainsString('href="https://evil.test"', (string) $mail->render());
     }
 
     public function test_notification_is_not_sent_when_status_does_not_change(): void
@@ -61,7 +97,7 @@ class RoadmapNotificationTest extends TestCase
 
         $user = User::factory()->create();
         $item = RoadmapItem::factory()->create([
-            'status' => RoadmapStatus::Approved,
+            'status' => RoadmapStatus::Planned,
             'user_id' => $user->id,
         ]);
 
@@ -75,11 +111,11 @@ class RoadmapNotificationTest extends TestCase
         Notification::fake();
 
         $item = RoadmapItem::factory()->create([
-            'status' => RoadmapStatus::PendingApproval,
+            'status' => RoadmapStatus::UnderReview,
             'user_id' => null,
         ]);
 
-        $item->update(['status' => RoadmapStatus::Approved]);
+        $item->update(['status' => RoadmapStatus::Planned]);
 
         Notification::assertNothingSent();
     }
@@ -89,7 +125,7 @@ class RoadmapNotificationTest extends TestCase
         $user = User::factory()->create(['name' => 'Jane Doe']);
         $item = RoadmapItem::factory()->create([
             'title' => 'Dark mode support',
-            'status' => RoadmapStatus::Approved,
+            'status' => RoadmapStatus::Planned,
             'user_id' => $user->id,
         ]);
 
@@ -113,7 +149,7 @@ class RoadmapNotificationTest extends TestCase
     public function test_notification_email_has_roadmap_action_link(): void
     {
         $user = User::factory()->create();
-        $item = RoadmapItem::factory()->approved()->create(['user_id' => $user->id]);
+        $item = RoadmapItem::factory()->planned()->create(['user_id' => $user->id]);
 
         $notification = new RoadmapItemStatusChangedNotification($item);
         $mail = $notification->toMail($user);
@@ -127,14 +163,38 @@ class RoadmapNotificationTest extends TestCase
 
         $user = User::factory()->create();
         $item = RoadmapItem::factory()->create([
-            'status' => RoadmapStatus::PendingApproval,
+            'status' => RoadmapStatus::UnderReview,
             'user_id' => $user->id,
         ]);
 
-        $item->update(['status' => RoadmapStatus::Approved]);
+        $item->update(['status' => RoadmapStatus::Planned]);
         $item->update(['status' => RoadmapStatus::InProgress]);
-        $item->update(['status' => RoadmapStatus::Completed]);
+        $item->update(['status' => RoadmapStatus::Shipped]);
 
         Notification::assertSentToTimes($user, RoadmapItemStatusChangedNotification::class, 3);
+    }
+
+    public function test_nobody_is_notified_of_a_status_change_that_rolled_back(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::UnderReview, 'user_id' => $user->id]);
+
+        try {
+            DB::transaction(function () use ($item): void {
+                $item->update(['status' => RoadmapStatus::Planned]);
+
+                throw new \RuntimeException('rolled back');
+            });
+        } catch (\RuntimeException) {
+        }
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_the_status_mail_is_queued(): void
+    {
+        $this->assertInstanceOf(ShouldQueue::class, new RoadmapItemStatusChangedNotification(RoadmapItem::factory()->make()));
     }
 }

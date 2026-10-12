@@ -20,6 +20,26 @@ class RoadmapItemResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage roadmap') ?? false;
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Roadmap');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Roadmap item');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Roadmap');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return RoadmapItemForm::configure($schema);
@@ -28,11 +48,6 @@ class RoadmapItemResource extends Resource
     public static function table(Table $table): Table
     {
         return RoadmapItemsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [];
     }
 
     public static function getPages(): array

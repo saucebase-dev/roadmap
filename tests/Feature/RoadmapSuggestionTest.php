@@ -52,7 +52,7 @@ class RoadmapSuggestionTest extends TestCase
         ]);
 
         $item = RoadmapItem::first();
-        $this->assertEquals(RoadmapStatus::PendingApproval, $item->status);
+        $this->assertEquals(RoadmapStatus::UnderReview, $item->status);
     }
 
     public function test_new_suggestion_is_not_visible_on_public_roadmap(): void
@@ -92,6 +92,23 @@ class RoadmapSuggestionTest extends TestCase
         $response->assertSessionHas('toast.type', 'success');
         $response->assertSessionHas('toast.message');
         $response->assertSessionHas('toast.description');
+    }
+
+    public function test_a_new_suggestion_starts_with_its_submitters_vote(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('roadmap.store'), [
+            'title' => 'Dark mode',
+            'type' => RoadmapType::Feature->value,
+        ]);
+
+        $item = RoadmapItem::firstWhere('title', 'Dark mode');
+
+        $this->assertDatabaseHas('roadmap_votes', [
+            'roadmap_item_id' => $item->id,
+            'user_id' => $user->id,
+        ]);
     }
 
     public function test_title_is_required(): void
@@ -195,7 +212,7 @@ class RoadmapSuggestionTest extends TestCase
     {
         $user = User::factory()->create();
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             $this->actingAs($user)->post(route('roadmap.store'), [
                 'title' => "Feature {$i}",
                 'type' => RoadmapType::Feature->value,

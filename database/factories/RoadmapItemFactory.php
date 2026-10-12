@@ -25,15 +25,15 @@ class RoadmapItemFactory extends Factory
         return [
             'title' => $this->faker->sentence(4, false),
             'description' => $this->faker->paragraph(),
-            'status' => RoadmapStatus::PendingApproval,
+            'status' => RoadmapStatus::UnderReview,
             'type' => $this->faker->randomElement(RoadmapType::cases()),
             'user_id' => User::factory(),
         ];
     }
 
-    public function approved(): static
+    public function planned(): static
     {
-        return $this->state(['status' => RoadmapStatus::Approved]);
+        return $this->state(['status' => RoadmapStatus::Planned]);
     }
 
     public function inProgress(): static
@@ -41,9 +41,9 @@ class RoadmapItemFactory extends Factory
         return $this->state(['status' => RoadmapStatus::InProgress]);
     }
 
-    public function completed(): static
+    public function shipped(): static
     {
-        return $this->state(['status' => RoadmapStatus::Completed]);
+        return $this->state(['status' => RoadmapStatus::Shipped]);
     }
 
     public function feature(): static

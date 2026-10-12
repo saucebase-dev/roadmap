@@ -9,43 +9,54 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 enum RoadmapStatus: string implements HasColor, HasLabel
 {
-    case PendingApproval = 'pending_approval';
-    case Approved = 'approved';
-    case Rejected = 'rejected';
+    case UnderReview = 'under_review';
+    case Backlog = 'backlog';
+    case Planned = 'planned';
     case InProgress = 'in_progress';
-    case Completed = 'completed';
-    case Cancelled = 'cancelled';
+    case Shipped = 'shipped';
+    case Closed = 'closed';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::PendingApproval => __('Pending Approval'),
-            self::Approved => __('Approved'),
-            self::Rejected => __('Rejected'),
+            self::UnderReview => __('Under Review'),
+            self::Backlog => __('Backlog'),
+            self::Planned => __('Planned'),
             self::InProgress => __('In Progress'),
-            self::Completed => __('Completed'),
-            self::Cancelled => __('Cancelled'),
+            self::Shipped => __('Shipped'),
+            self::Closed => __('Closed'),
         };
     }
 
     public function getColor(): string
     {
         return match ($this) {
-            self::PendingApproval => 'warning',
-            self::Approved => 'success',
-            self::Rejected => 'danger',
-            self::InProgress => 'info',
-            self::Completed => 'primary',
-            self::Cancelled => 'gray',
+            self::UnderReview => 'warning',
+            self::Backlog => 'gray',
+            self::Planned => 'info',
+            self::InProgress => 'primary',
+            self::Shipped => 'success',
+            self::Closed => 'danger',
         };
     }
 
+    /**
+     * Statuses visible to visitors.
+     *
+     * @return array<int, self>
+     */
     public static function publicStatuses(): array
     {
-        return [
-            self::Approved,
-            self::InProgress,
-            self::Completed,
-        ];
+        return [self::Backlog, ...self::boardStatuses()];
+    }
+
+    /**
+     * Statuses that get their own column on the roadmap board.
+     *
+     * @return array<int, self>
+     */
+    public static function boardStatuses(): array
+    {
+        return [self::Planned, self::InProgress, self::Shipped];
     }
 }

@@ -4,6 +4,9 @@
   "type": "saucebase-module",
   "license": "proprietary",
   "version": "v2.0.1",
+  "require": {
+    "saucebase/core": "^1.6"
+  },
   "authors": [
     {
       "name": "Saucebase",
@@ -16,6 +19,9 @@
         "Modules\\Roadmap\\Providers\\RoadmapServiceProvider"
       ],
       "aliases": {}
+    },
+    "saucebase": {
+      "frameworks": ["vue", "react"]
     }
   },
   "autoload": {
