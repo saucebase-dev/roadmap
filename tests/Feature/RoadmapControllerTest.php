@@ -58,7 +58,7 @@ class RoadmapControllerTest extends TestCase
 
     public function test_an_item_that_is_not_public_stays_hidden_from_everyone_else(): void
     {
-        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::UnderReview, 'user_id' => User::factory()->create()->id]);
+        $item = RoadmapItem::factory()->for(User::factory())->create(['status' => RoadmapStatus::UnderReview]);
 
         $this->get(route('roadmap.show', $item))->assertNotFound();
         $this->actingAs(User::factory()->create())->get(route('roadmap.show', $item))->assertNotFound();
@@ -67,7 +67,7 @@ class RoadmapControllerTest extends TestCase
     /** Whoever moderates the roadmap reads every item, and an admin passes every check. */
     public function test_roadmap_staff_can_open_an_item_that_is_not_public(): void
     {
-        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::UnderReview, 'user_id' => User::factory()->create()->id]);
+        $item = RoadmapItem::factory()->for(User::factory())->create(['status' => RoadmapStatus::UnderReview]);
 
         Permission::findOrCreate('manage roadmap');
         $staff = User::factory()->create()->givePermissionTo('manage roadmap');

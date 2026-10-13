@@ -348,18 +348,11 @@ export default function Index({
                     </DialogHeader>
 
                     <form onSubmit={submitSuggestion} className="space-y-4">
-                        <div className="space-y-1.5">
-                            <span
-                                id="suggest-type-label"
-                                className="text-sm font-medium"
-                            >
+                        <fieldset className="space-y-1.5">
+                            <legend className="text-sm font-medium">
                                 {t('Type')}
-                            </span>
-                            <div
-                                role="group"
-                                aria-labelledby="suggest-type-label"
-                                className="flex gap-2"
-                            >
+                            </legend>
+                            <div className="flex gap-2">
                                 {types.map((type) => (
                                     <button
                                         key={type.value}
@@ -381,7 +374,7 @@ export default function Index({
                                     </button>
                                 ))}
                             </div>
-                        </div>
+                        </fieldset>
 
                         <div className="space-y-1.5">
                             <label
