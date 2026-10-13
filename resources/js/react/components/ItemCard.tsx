@@ -34,7 +34,7 @@ export default function ItemCard({
                 itemId={item.id}
                 votes={item.votes_count}
                 voted={item.has_voted}
-                pending={votePending}
+                pending={votePending || !item.votable}
                 onVote={() => onVote(item)}
             />
 

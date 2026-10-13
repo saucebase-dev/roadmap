@@ -25,6 +25,8 @@ final class RoadmapItemData extends Data
         public int $votes_count,
         public int $comments_count,
         public bool $has_voted,
+        /** False while the item is hidden from visitors: its author can read it, nobody can vote on it. */
+        public bool $votable,
         public string $created_at,
     ) {}
 
@@ -43,6 +45,7 @@ final class RoadmapItemData extends Data
             votes_count: $item->votes_count,
             comments_count: $item->comments_count,
             has_voted: $hasVoted,
+            votable: $item->isPublic(),
             created_at: $item->created_at->toDateString(),
         );
     }

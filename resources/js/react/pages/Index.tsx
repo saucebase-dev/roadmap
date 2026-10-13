@@ -349,14 +349,24 @@ export default function Index({
 
                     <form onSubmit={submitSuggestion} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium">
+                            <span
+                                id="suggest-type-label"
+                                className="text-sm font-medium"
+                            >
                                 {t('Type')}
-                            </label>
-                            <div className="flex gap-2">
+                            </span>
+                            <div
+                                role="group"
+                                aria-labelledby="suggest-type-label"
+                                className="flex gap-2"
+                            >
                                 {types.map((type) => (
                                     <button
                                         key={type.value}
                                         type="button"
+                                        aria-pressed={
+                                            form.data.type === type.value
+                                        }
                                         className={cn(
                                             'rounded-md border px-4 py-1.5 text-sm font-medium transition-colors',
                                             form.data.type === type.value

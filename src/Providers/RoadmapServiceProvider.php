@@ -4,8 +4,10 @@ namespace Modules\Roadmap\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Roadmap\Models\RoadmapItem;
+use Modules\Roadmap\Policies\RoadmapItemPolicy;
 use Saucebase\Core\Providers\ModuleServiceProvider;
 use Saucebase\Core\Sitemap\SitemapRegistry;
 use Spatie\Sitemap\Sitemap;
@@ -17,6 +19,8 @@ class RoadmapServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         $this->registerRateLimits();
+
+        Gate::policy(RoadmapItem::class, RoadmapItemPolicy::class);
 
         $this->app->make(SitemapRegistry::class)->add(fn (Sitemap $sitemap) => $sitemap
             ->add(route('roadmap.index'))

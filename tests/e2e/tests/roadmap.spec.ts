@@ -154,6 +154,38 @@ test.describe('Roadmap', () => {
         await expect(page).toHaveURL(/\/roadmap$/);
     });
 
+    test('a vote in the slideover shows on the board behind it', async ({
+        page,
+        laravel,
+        credentials,
+        loginAs,
+    }) => {
+        const item = await laravel.factory(itemModel, {
+            title: 'Voted in the panel',
+            status: 'planned',
+            type: 'feature',
+        });
+
+        await loginAs(credentials.user);
+        await page.goto('/roadmap');
+        await page.getByTestId(`roadmap-item-link-${item.id}`).click();
+
+        const panel = page.getByTestId('roadmap-item-modal');
+        await panel.getByTestId(`vote-btn-${item.id}`).click();
+        await expect(panel.getByTestId(`vote-count-${item.id}`)).toHaveText(
+            '1',
+        );
+
+        await page.keyboard.press('Escape');
+        await expect(panel).toHaveCount(0);
+
+        await expect(page.getByTestId(`vote-count-${item.id}`)).toHaveText('1');
+        await expect(page.getByTestId(`vote-btn-${item.id}`)).toHaveAttribute(
+            'data-voted',
+            'true',
+        );
+    });
+
     test('the item URL opens as a full page with a canonical link', async ({
         page,
         laravel,

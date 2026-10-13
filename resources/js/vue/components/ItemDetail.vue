@@ -31,14 +31,18 @@ watch(
     { deep: true },
 );
 
-const { vote, pending } = useVote(props.authenticated, ['item']);
-const { login } = useAuth();
-
-const form = useForm({ body: '' });
-
 // Inside a slideover the redirect refreshes the board behind it, so the panel
 // has to ask for its own props again to show the new comment.
 const modal = useModal();
+
+// A vote in the slideover refreshes the board's items, or its card keeps the old count.
+const { vote, pending } = useVote(
+    props.authenticated,
+    modal ? ['items'] : ['item'],
+);
+const { login } = useAuth();
+
+const form = useForm({ body: '' });
 
 function submitComment() {
     if (modal) {
@@ -79,7 +83,7 @@ const { language } = useLocalization();
                 :item-id="item.id"
                 :votes="item.votes_count"
                 :voted="item.has_voted"
-                :pending="pending.has(item.id)"
+                :pending="pending.has(item.id) || !item.votable"
                 @vote="vote(item)"
             />
 

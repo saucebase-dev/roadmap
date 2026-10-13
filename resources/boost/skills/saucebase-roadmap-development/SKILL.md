@@ -29,6 +29,12 @@ One permission, `manage roadmap`, covers the whole admin area: `RoadmapItemResou
 
 Every read and write path checks `RoadmapItem::isPublic()` and 404s otherwise. Adding a status means deciding which of those two lists it belongs to.
 
+One exception, in `RoadmapItemPolicy::view()`: an item's author can open their own item whatever its
+status, because "My feedback" lists and links it, and so can anyone with `manage roadmap`. The page
+is read-only then: the payload's `votable` is false, which disables the vote button, and
+`comments_enabled` is false. The vote and comment routes still 404. The page answers 404 on a
+refusal, never 403, which would confirm the item exists.
+
 ### A Vote Row Is An Upvote
 
 There are no downvotes and no vote type column. A row in `roadmap_votes` means "this user wants this", and voting again deletes the row. The unique index on `(roadmap_item_id, user_id)` is what keeps one vote per person.

@@ -30,8 +30,15 @@ export default function ItemDetail({
 
     useEffect(() => setItem(initialItem), [initialItem]);
 
-    const { vote, pending } = useVote(authenticated, ['item'], (_, change) =>
-        setItem((current) => ({ ...current, ...change })),
+    // Inside a slideover the redirect refreshes the board behind it, so the panel
+    // has to ask for its own props again to show the new comment.
+    const modal = useModal();
+
+    // A vote in the slideover refreshes the board's items, or its card keeps the old count.
+    const { vote, pending } = useVote(
+        authenticated,
+        modal ? ['items'] : ['item'],
+        (_, change) => setItem((current) => ({ ...current, ...change })),
     );
 
     const { login } = useAuth();
@@ -41,10 +48,6 @@ export default function ItemDetail({
     // React's form has no processing setter, so the slideover request tracks its own.
     const [posting, setPosting] = useState(false);
     const processing = form.processing || posting;
-
-    // Inside a slideover the redirect refreshes the board behind it, so the panel
-    // has to ask for its own props again to show the new comment.
-    const modal = useModal();
 
     function submitComment(event: React.FormEvent) {
         event.preventDefault();
@@ -84,7 +87,7 @@ export default function ItemDetail({
                     itemId={item.id}
                     votes={item.votes_count}
                     voted={item.has_voted}
-                    pending={pending.has(item.id)}
+                    pending={pending.has(item.id) || !item.votable}
                     onVote={() => vote(item)}
                 />
 
