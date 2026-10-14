@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Models\RoadmapItem;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class RoadmapControllerTest extends TestCase
@@ -36,6 +37,50 @@ class RoadmapControllerTest extends TestCase
             ->has('items', 1)
             ->where('items.0.id', $planned->id)
         );
+    }
+
+    /** "My feedback" lists a person's own items whatever their status, and each one links to its page. */
+    public function test_an_author_can_open_their_own_item_that_is_not_public(): void
+    {
+        $author = User::factory()->create();
+        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::UnderReview, 'user_id' => $author->id]);
+
+        $this->actingAs($author)
+            ->get(route('roadmap.show', $item))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('item.id', $item->id)
+                // Voting and commenting stay closed until the item is public.
+                ->where('item.votable', false)
+                ->where('item.comments_enabled', false)
+            );
+    }
+
+    public function test_an_item_that_is_not_public_stays_hidden_from_everyone_else(): void
+    {
+        $item = RoadmapItem::factory()->for(User::factory())->create(['status' => RoadmapStatus::UnderReview]);
+
+        $this->get(route('roadmap.show', $item))->assertNotFound();
+        $this->actingAs(User::factory()->create())->get(route('roadmap.show', $item))->assertNotFound();
+    }
+
+    /** Whoever moderates the roadmap reads every item, and an admin passes every check. */
+    public function test_roadmap_staff_can_open_an_item_that_is_not_public(): void
+    {
+        $item = RoadmapItem::factory()->for(User::factory())->create(['status' => RoadmapStatus::UnderReview]);
+
+        Permission::findOrCreate('manage roadmap');
+        $staff = User::factory()->create()->givePermissionTo('manage roadmap');
+
+        $this->actingAs($staff)->get(route('roadmap.show', $item))->assertOk();
+    }
+
+    public function test_a_public_item_can_be_voted_on(): void
+    {
+        $item = RoadmapItem::factory()->planned()->create();
+
+        $this->get(route('roadmap.show', $item))
+            ->assertInertia(fn ($page) => $page->where('item.votable', true));
     }
 
     public function test_items_show_whether_the_user_has_voted(): void
@@ -78,6 +123,7 @@ class RoadmapControllerTest extends TestCase
                 ->has('votes_count')
                 ->has('comments_count')
                 ->has('has_voted')
+                ->has('votable')
                 ->has('created_at')
             )
         );

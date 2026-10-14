@@ -5,6 +5,7 @@ namespace Modules\Roadmap\Http\Controllers;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -68,7 +69,8 @@ class RoadmapController
      */
     public function show(RoadmapItem $item, RoadmapSettings $settings): Response|Modal
     {
-        abort_unless($item->isPublic(), 404);
+        // 404 and not 403: a refusal would confirm that a hidden item exists.
+        abort_unless(Gate::allows('view', $item), 404);
 
         $item->loadCount(['votes', 'visibleComments as comments_count'])->load('visibleComments.user');
 
@@ -79,7 +81,7 @@ class RoadmapController
         $detail = new RoadmapItemDetailData(
             official_response: $item->official_response,
             official_response_at: $item->official_response_at?->toIso8601String(),
-            comments_enabled: $settings->comments_enabled,
+            comments_enabled: $settings->comments_enabled && $item->isPublic(),
             comments: $item->visibleComments
                 ->map(fn (RoadmapComment $comment) => RoadmapCommentData::fromComment($comment, auth()->id()))
                 ->all(),

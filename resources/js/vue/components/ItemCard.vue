@@ -28,7 +28,7 @@ defineEmits<{ vote: [item: RoadmapItem] }>();
             :item-id="item.id"
             :votes="item.votes_count"
             :voted="item.has_voted"
-            :pending="votePending"
+            :pending="votePending || !item.votable"
             @vote="$emit('vote', item)"
         />
 

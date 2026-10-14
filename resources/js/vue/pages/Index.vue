@@ -367,15 +367,16 @@ function submitSuggestion() {
                 </DialogHeader>
 
                 <form @submit.prevent="submitSuggestion" class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label class="text-sm font-medium">{{
-                            $t('Type')
-                        }}</label>
+                    <fieldset class="space-y-1.5">
+                        <legend class="text-sm font-medium">
+                            {{ $t('Type') }}
+                        </legend>
                         <div class="flex gap-2">
                             <button
                                 v-for="type in types"
                                 :key="type.value"
                                 type="button"
+                                :aria-pressed="form.type === type.value"
                                 :class="[
                                     'rounded-md border px-4 py-1.5 text-sm font-medium transition-colors',
                                     form.type === type.value
@@ -387,7 +388,7 @@ function submitSuggestion() {
                                 {{ type.label }}
                             </button>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <div class="space-y-1.5">
                         <label for="suggest-title" class="text-sm font-medium">
