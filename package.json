@@ -1,0 +1,8 @@
+{
+    "name": "@saucebase/roadmap",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@iconify-json/solar": "^1.2.13"
+    }
+}
