@@ -1,11 +1,11 @@
 {
   "name": "saucebase/roadmap",
-  "description": "Roadmap module",
+  "description": "A public roadmap for Saucebase: feature requests, upvotes, comments and team replies.",
   "type": "saucebase-module",
   "license": "MIT",
   "version": "v3.2.1",
   "require": {
-    "saucebase/core": "^1.6"
+    "saucebase/core": "^1.13"
   },
   "authors": [
     {

@@ -1,95 +1,62 @@
-# Roadmap Module
+# Saucebase Roadmap
 
 <div align="center">
 
 [![Tests](https://github.com/saucebase-dev/roadmap/actions/workflows/test.yml/badge.svg)](https://github.com/saucebase-dev/roadmap/actions/workflows/test.yml)
 [![Release](https://img.shields.io/github/v/release/saucebase-dev/roadmap)](https://github.com/saucebase-dev/roadmap/releases)
-[![Saucebase Core](https://img.shields.io/badge/Saucebase_Core-1.6+-FF6B35)](https://github.com/saucebase-dev/core)
-[![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?logo=php&logoColor=white)](https://php.net)
-
-Works with:<br/>
-[![Vue 3.5](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org) [![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![Saucebase Core](https://img.shields.io/packagist/dependency-v/saucebase/roadmap/saucebase%2Fcore?label=Saucebase%20Core&color=FF6B35)](https://github.com/saucebase-dev/core)
+[![License](https://img.shields.io/github/license/saucebase-dev/roadmap)](LICENSE)
 
 </div>
 
-A public roadmap for [Saucebase](https://github.com/saucebase-dev/saucebase), a Laravel SaaS starter kit.
+A public roadmap for Saucebase: feature requests, upvotes, comments and team replies.
 
-Adds `/roadmap`, where users suggest features, vote on them, and follow what you are building. You review suggestions in the admin before anything appears.
-
-**[Full documentation →](https://saucebase-dev.github.io/docs/modules/roadmap)**
+A module for [Saucebase](https://github.com/saucebase-dev/saucebase), the AI-ready Laravel SaaS kit. Modules are Composer packages you add to a Saucebase app; once installed, the code is yours to change.
 
 ## Features
 
-- **Public board** — Planned, In Progress and Shipped columns, with a backlog underneath
-- **Feature requests** — users suggest what they want
-- **Upvotes** — one vote per person, click again to take it back
-- **Team response** — answer an item publicly, shown highlighted above the comments
-- **Comments** — on every item, with moderation that hides rather than deletes
-- **You review first** — suggestions land hidden and only appear once you approve them
-- **Merge duplicates** — fold the same request into one, keeping its votes and comments
-- **Opens in place** — clicking an item slides it over the board, but the link still works on its own
-- **Built for search** — items are real pages and can go in your sitemap
-- **Admin panel** — review, change status and moderate at `/admin`
-- **Vue and React** — works on both
+- **Public board**: Planned, In Progress and Shipped, with a backlog underneath
+- **Feature requests** from your users, reviewed by you before they appear
+- **Upvotes**: one per person, click again to take it back
+- **Team replies**, highlighted above the comments
+- **Comments**, with moderation that hides rather than deletes
+- **Merge duplicates**, keeping their votes and comments
+- **Opens in place**: items slide over the board, and their links work on their own
+- **Built for search**: every item is a real page
+- **Admin panel** to review, change status and moderate
+- **Vue and React**
 
-## Requirements
+## Install
 
-| | |
-| --- | --- |
-| Saucebase core | `^1.6` |
-| Modules | [Auth](https://github.com/saucebase-dev/auth) |
+**New to Saucebase?** Start a new app and pick **roadmap** when it asks for modules:
 
-## Installation
+```bash
+curl -fsSL https://install.saucebase.dev | bash
+```
+
+It installs PHP and Composer if they're missing. With the CLI already installed, run `saucebase new my-app` instead.
+
+**Already have a Saucebase app?** Add it with:
 
 ```bash
 composer require saucebase/roadmap
 php artisan migrate
+php artisan modules:seed --module=roadmap
 npm run build
 ```
 
-Your board is at `/roadmap`. Anyone can read it; voting, commenting and suggesting need an account.
+## Configuration
 
-### Sample data (optional)
+One switch in the admin panel, under **Settings → Roadmap**: whether comments are on.
+
+## Demo data
 
 ```bash
 php artisan modules:seed --module=roadmap --demo
 ```
 
-Adds sample items, votes and comments so the board is not empty while you look around.
-
-## How the statuses work
-
-Every suggestion arrives as **Under review** and is invisible to visitors until you move it on.
-
-| Status | Where it shows |
-| --- | --- |
-| Under review | Nowhere — waiting for you |
-| Backlog | Public, listed under the board |
-| Planned | Board column |
-| In progress | Board column |
-| Shipped | Board column |
-| Closed | Nowhere — rejected, cancelled or merged |
-
-## Extending
-
-**Listen for status changes.** `StatusChanged` fires whenever you move an item, so you can post to Slack or email the people who voted:
-
-```php
-use Modules\Roadmap\Events\StatusChanged;
-
-Event::listen(StatusChanged::class, function (StatusChanged $event) {
-    // $event->item
-});
-```
-
-**Change the pages.** The board and the item view are normal Vue and React pages in `resources/js/`. Edit them like any other.
-
-## Configuration
-
-One switch, at **`/admin` → Settings → Roadmap**: whether comments are on.
-
-See the [documentation](https://saucebase-dev.github.io/docs/modules/roadmap) for moderation, merging and customising the board.
+Adds sample items with votes and comments from sample users, and a staff account (`roadmap@saucebase.dev`) that only sees the roadmap in the admin. All use the `DEMO_PASSWORD` from `.env`.
 
 ## License
 
-Proprietary. Part of [Saucebase](https://github.com/saucebase-dev/saucebase).
+MIT. See [LICENSE](LICENSE).

@@ -17,7 +17,7 @@ class DemoRoadmapDatabaseSeeder extends Seeder
         Role::findOrCreate('roadmap admin')->syncPermissions(['access admin panel', 'manage roadmap']);
         $staff = User::firstOrCreate(
             ['email' => 'roadmap@saucebase.dev'],
-            ['name' => 'Roadmap Admin', 'password' => bcrypt('secretsauce')],
+            ['name' => 'Roadmap Admin', 'password' => bcrypt(config('saucebase.demo_password'))],
         );
         $staff->syncRoles('roadmap admin');
 
