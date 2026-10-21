@@ -5,7 +5,9 @@ namespace Modules\Roadmap\Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Roadmap\Enums\RoadmapStatus;
+use Modules\Roadmap\Enums\RoadmapType;
 use Modules\Roadmap\Models\RoadmapItem;
+use Modules\Roadmap\Settings\RoadmapSettings;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -191,6 +193,61 @@ class RoadmapControllerTest extends TestCase
             ->where('items.0.id', $old->id)
             ->where('items.1.id', $new->id)
         );
+    }
+
+    /** Created out of date order, so insertion order cannot pass for date order. */
+    public function test_oldest_sorts_by_date_not_by_insertion(): void
+    {
+        $new = RoadmapItem::factory()->planned()->create(['created_at' => now()]);
+        $old = RoadmapItem::factory()->planned()->create(['created_at' => now()->subDays(5)]);
+
+        $this->get(route('roadmap.index', ['sort' => 'old']))->assertInertia(fn ($page) => $page
+            ->where('items.0.id', $old->id)
+            ->where('items.1.id', $new->id)
+        );
+    }
+
+    public function test_the_board_receives_its_settings_columns_and_types(): void
+    {
+        $settings = app(RoadmapSettings::class);
+        $settings->comments_enabled = false;
+        $settings->save();
+
+        $this->get(route('roadmap.index'))->assertInertia(fn ($page) => $page
+            ->where('comments_enabled', false)
+            ->where('columns', collect(RoadmapStatus::boardStatuses())->map(fn (RoadmapStatus $s) => ['value' => $s->value, 'label' => $s->getLabel()])->all())
+            ->where('types.0.value', RoadmapType::cases()[0]->value)
+            ->where('types.0.label', RoadmapType::cases()[0]->getLabel())
+            ->where('types.0.color', RoadmapType::cases()[0]->getColor())
+        );
+    }
+
+    public function test_a_suggestion_needs_a_title_and_a_type(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post(route('roadmap.store'), [])
+            ->assertInvalid(['title', 'type']);
+    }
+
+    public function test_a_suggestion_can_leave_the_description_empty(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post(route('roadmap.store'), ['title' => 'Dark mode', 'description' => '', 'type' => RoadmapType::cases()[0]->value])
+            ->assertValid();
+
+        $this->assertDatabaseHas('roadmap_items', ['title' => 'Dark mode', 'description' => null]);
+    }
+
+    public function test_a_submitted_suggestion_says_it_is_under_review(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post(route('roadmap.store'), ['title' => 'Dark mode', 'type' => RoadmapType::cases()[0]->value])
+            ->assertRedirect(route('roadmap.index'))
+            ->assertSessionHas('toast', [
+                'type' => 'success',
+                'message' => __('Suggestion submitted!'),
+                'description' => __('Your idea is under review. We\'ll publish it once it is approved.'),
+            ]);
     }
 
     public function test_my_feedback_only_lists_items_i_submitted(): void

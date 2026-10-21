@@ -77,6 +77,17 @@ class RoadmapNotificationTest extends TestCase
         Notification::assertNotSentTo($bystander, RoadmapItemStatusChangedNotification::class);
     }
 
+    public function test_the_email_greets_the_recipient_and_names_the_new_status(): void
+    {
+        $user = User::factory()->create(['name' => 'Ada']);
+        $item = RoadmapItem::factory()->create(['status' => RoadmapStatus::Planned, 'user_id' => $user->id]);
+
+        $mail = (new RoadmapItemStatusChangedNotification($item))->toMail($user);
+
+        $this->assertSame(__('Hello :name,', ['name' => 'Ada']), $mail->greeting);
+        $this->assertContains(__('New status: **:status**', ['status' => RoadmapStatus::Planned->getLabel()]), $mail->introLines);
+    }
+
     public function test_a_title_cannot_smuggle_a_link_into_the_email(): void
     {
         $user = User::factory()->create();
