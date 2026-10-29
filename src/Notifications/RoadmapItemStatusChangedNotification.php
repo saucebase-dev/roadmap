@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Roadmap\Models\RoadmapItem;
+use Saucebase\Core\Support\Markdown;
 
 class RoadmapItemStatusChangedNotification extends Notification implements ShouldQueue
 {
@@ -29,19 +30,10 @@ class RoadmapItemStatusChangedNotification extends Notification implements Shoul
         return (new MailMessage)
             ->subject(__('Your roadmap item status has been updated'))
             ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
-            ->line(__('The status of your roadmap item **":title"** has been updated.', ['title' => $this->escapeMarkdown($this->item->title)]))
+            ->line(__('The status of your roadmap item **":title"** has been updated.', ['title' => Markdown::escape($this->item->title)]))
             ->line(__('New status: **:status**', ['status' => $this->item->status->getLabel()]))
             ->action(__('View Roadmap'), route('roadmap.index'))
             ->line(__('Thank you for your feedback!'));
-    }
-
-    /**
-     * Mail lines are rendered as Markdown, so a title someone typed could
-     * otherwise turn itself into a link in the reader's inbox.
-     */
-    private function escapeMarkdown(string $text): string
-    {
-        return preg_replace('/([\\\\`*_{}\[\]()#+\-.!|>~])/', '\\\\$1', $text) ?? $text;
     }
 
     /**
