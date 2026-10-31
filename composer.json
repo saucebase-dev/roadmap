@@ -3,7 +3,7 @@
   "description": "A public roadmap for Saucebase: feature requests, upvotes, comments and team replies.",
   "type": "saucebase-module",
   "license": "MIT",
-  "version": "v3.4.3",
+  "version": "v3.4.4",
   "require": {
     "saucebase/core": "^2.8"
   },
