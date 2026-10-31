@@ -63,6 +63,7 @@ export function useVote(
             {},
             {
                 preserveScroll: true,
+                preserveUrl: true,
                 only,
                 onSuccess: () =>
                     hadVoted

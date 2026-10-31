@@ -43,6 +43,7 @@ export function useVote(authenticated: boolean, only: string[]) {
             {},
             {
                 preserveScroll: true,
+                preserveUrl: true,
                 only,
                 onSuccess: () =>
                     hadVoted

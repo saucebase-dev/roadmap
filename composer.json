@@ -5,7 +5,7 @@
   "license": "MIT",
   "version": "v3.4.2",
   "require": {
-    "saucebase/core": "^2.7"
+    "saucebase/core": "^2.8"
   },
   "authors": [
     {

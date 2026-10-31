@@ -154,7 +154,7 @@ test.describe('Roadmap', () => {
         await expect(page).toHaveURL(/\/roadmap$/);
     });
 
-    test('a vote in the slideover shows on the board behind it', async ({
+    test('voting in the slideover keeps it open and updates the board', async ({
         page,
         laravel,
         credentials,
@@ -175,14 +175,36 @@ test.describe('Roadmap', () => {
         await expect(panel.getByTestId(`vote-count-${item.id}`)).toHaveText(
             '1',
         );
+        await expect(page.locator('[data-sonner-toast]')).toContainText(
+            'Upvoted!',
+        );
+        await expect(panel).toBeVisible();
+        await expect(page).toHaveURL(new RegExp(`/roadmap/${item.slug}$`));
+        const card = page.getByTestId(`roadmap-item-${item.id}`);
+        await expect(card.getByTestId(`vote-count-${item.id}`)).toHaveText('1');
+
+        await panel.getByTestId(`vote-btn-${item.id}`).click();
+        await expect(page.locator('[data-sonner-toast]').last()).toContainText(
+            'Vote removed',
+        );
+        await expect(panel).toBeVisible();
+        await expect(page).toHaveURL(new RegExp(`/roadmap/${item.slug}$`));
+        await expect(panel.getByTestId(`vote-count-${item.id}`)).toHaveText(
+            '0',
+        );
+        await expect(panel.getByTestId(`vote-btn-${item.id}`)).toHaveAttribute(
+            'data-voted',
+            'false',
+        );
+        await expect(card.getByTestId(`vote-count-${item.id}`)).toHaveText('0');
 
         await page.keyboard.press('Escape');
         await expect(panel).toHaveCount(0);
 
-        await expect(page.getByTestId(`vote-count-${item.id}`)).toHaveText('1');
+        await expect(page.getByTestId(`vote-count-${item.id}`)).toHaveText('0');
         await expect(page.getByTestId(`vote-btn-${item.id}`)).toHaveAttribute(
             'data-voted',
-            'true',
+            'false',
         );
     });
 
