@@ -25,9 +25,21 @@ const props = defineProps<{
 // Voting updates the count before the server answers, so the item is local state.
 const item = reactive({ ...props.item });
 
+// Copied again only when the server's values change. In the slideover, the board's
+// reload hands the panel the same item afresh; copying that would undo a vote whose
+// answer hasn't arrived, and the next click would vote again instead of removing it.
+let received = JSON.stringify(props.item);
+
 watch(
     () => props.item,
-    (updated) => Object.assign(item, updated),
+    (updated) => {
+        const next = JSON.stringify(updated);
+
+        if (next !== received) {
+            received = next;
+            Object.assign(item, updated);
+        }
+    },
     { deep: true },
 );
 

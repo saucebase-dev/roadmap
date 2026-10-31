@@ -171,6 +171,9 @@ test.describe('Roadmap', () => {
         await page.getByTestId(`roadmap-item-link-${item.id}`).click();
 
         const panel = page.getByTestId('roadmap-item-modal');
+        // The slideover's own visit ends by pushing its URL; a vote sent before
+        // that would be cancelled by it.
+        await expect(page).toHaveURL(new RegExp(`/roadmap/${item.slug}$`));
         await panel.getByTestId(`vote-btn-${item.id}`).click();
         await expect(panel.getByTestId(`vote-count-${item.id}`)).toHaveText(
             '1',
