@@ -9,7 +9,7 @@ Paths are relative to `modules/roadmap/` unless they say otherwise. Commands run
 
 ## Overview
 
-Public roadmap board with feature requests, upvotes, comments, team replies, and duplicate merging. Filament admin at `/admin` → Roadmap. `Filament\Widgets\RoadmapAttentionWidget` puts "Suggestions to review" (status Under Review) on the dashboard, sort 21, only while there are any.
+Public roadmap board with feature requests, upvotes, comments, team replies, and duplicate merging. Filament admin at `/admin` → Roadmap. `Modules\Roadmap\Filament\Widgets\RoadmapAttentionWidget` puts "Suggestions to review" (status Under Review) on the dashboard, sort 21, only while there are any.
 
 ---
 
