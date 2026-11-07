@@ -45,7 +45,7 @@ Writes go through `src/Actions/`: `SubmitSuggestion`, `ToggleVote` and `MergeIte
 
 ### Public Page, Optional Login
 
-`roadmap.index` and `roadmap.show` are outside the `auth` middleware — they are the marketing surface and are in the sitemap. Voting, commenting, and suggesting are inside it (`roadmap.vote`, `roadmap.comments.store`, `roadmap.store`). Both pages send an `authenticated` prop so the frontend sends guests to login instead of hiding the buttons.
+`roadmap.index` and `roadmap.show` are outside the `auth` middleware — they are the marketing surface and are in the sitemap. Voting, commenting, and suggesting are inside `auth` and `verified` (`roadmap.vote`, `roadmap.comments.store`, `roadmap.store`); `verified` only acts once the app's User implements `MustVerifyEmail` (sc-1134). Both pages send an `authenticated` prop so the frontend sends guests to login instead of hiding the buttons.
 
 ### Page Or Slideover, Same URL
 
