@@ -9,7 +9,7 @@ use Modules\Roadmap\Enums\RoadmapType;
 use Modules\Roadmap\Models\RoadmapItem;
 use Spatie\Permission\Models\Role;
 
-class DemoRoadmapDatabaseSeeder extends Seeder
+class ShowcaseRoadmapDatabaseSeeder extends Seeder
 {
     public function run(): void
     {
