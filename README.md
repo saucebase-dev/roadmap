@@ -50,7 +50,7 @@ One switch in the admin panel, under **Settings → Roadmap**: whether comments 
 ## Demo data
 
 ```bash
-php artisan modules:seed --module=roadmap --demo
+php artisan modules:seed --module=roadmap --state=showcase
 ```
 
 Adds sample items with votes and comments from sample users, and a staff account (`roadmap@saucebase.dev`) that only sees the roadmap in the admin. All use the `DEMO_PASSWORD` from `.env`.
