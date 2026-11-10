@@ -60,6 +60,7 @@ export default function ItemCard({
                             variant="secondary"
                             className="text-xs"
                             data-testid={`item-status-${item.id}`}
+                            data-state={item.status}
                         >
                             {item.status_label}
                         </Badge>
