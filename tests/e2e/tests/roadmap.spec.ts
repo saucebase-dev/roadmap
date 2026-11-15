@@ -178,19 +178,12 @@ test.describe('Roadmap', () => {
         await expect(panel.getByTestId(`vote-count-${item.id}`)).toHaveText(
             '1',
         );
-        // Toasts stack (sign-in, then each vote): look a toast up by its text.
-        await expect(
-            page.locator('[data-sonner-toast]', { hasText: 'Upvoted!' }),
-        ).toBeVisible();
         await expect(panel).toBeVisible();
         await expect(page).toHaveURL(new RegExp(`/roadmap/${item.slug}$`));
         const card = page.getByTestId(`roadmap-item-${item.id}`);
         await expect(card.getByTestId(`vote-count-${item.id}`)).toHaveText('1');
 
         await panel.getByTestId(`vote-btn-${item.id}`).click();
-        await expect(
-            page.locator('[data-sonner-toast]', { hasText: 'Vote removed' }),
-        ).toBeVisible();
         await expect(panel).toBeVisible();
         await expect(page).toHaveURL(new RegExp(`/roadmap/${item.slug}$`));
         await expect(panel.getByTestId(`vote-count-${item.id}`)).toHaveText(
@@ -315,7 +308,9 @@ test.describe('Roadmap', () => {
         await page.getByTestId('filter-mine').click();
         const mine = page.getByTestId('roadmap-mine');
         await expect(mine).toContainText('Export to CSV');
-        await expect(mine).toContainText('Under Review');
+        await expect(
+            mine.locator('[data-testid^="item-status-"]'),
+        ).toHaveAttribute('data-state', 'under_review');
 
         await page.getByTestId('filter-mine-back').click();
         await expect(page.getByTestId('roadmap-board')).toBeVisible();

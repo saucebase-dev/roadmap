@@ -5,7 +5,7 @@
   "license": "MIT",
   "version": "v3.5.1",
   "require": {
-    "saucebase/core": "^2.8"
+    "saucebase/core": "^3.0"
   },
   "authors": [
     {
@@ -25,6 +25,9 @@
         "vue",
         "react"
       ]
+    },
+    "branch-alias": {
+      "dev-dev": "3.6.x-dev"
     }
   },
   "autoload": {

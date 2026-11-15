@@ -55,6 +55,7 @@ defineEmits<{ vote: [item: RoadmapItem] }>();
                     variant="secondary"
                     class="text-xs"
                     :data-testid="`item-status-${item.id}`"
+                    :data-state="item.status"
                 >
                     {{ item.status_label }}
                 </Badge>
