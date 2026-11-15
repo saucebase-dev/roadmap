@@ -308,9 +308,10 @@ test.describe('Roadmap', () => {
         await page.getByTestId('filter-mine').click();
         const mine = page.getByTestId('roadmap-mine');
         await expect(mine).toContainText('Export to CSV');
-        await expect(
-            mine.locator('[data-testid^="item-status-"]'),
-        ).toHaveAttribute('data-state', 'under_review');
+        const status = mine.locator('[data-testid^="item-status-"]');
+        await expect(status).toBeVisible();
+        await expect(status).toHaveAttribute('data-state', 'under_review');
+        await expect(status).toHaveText(/\S/);
 
         await page.getByTestId('filter-mine-back').click();
         await expect(page.getByTestId('roadmap-board')).toBeVisible();
