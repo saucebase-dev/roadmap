@@ -43,7 +43,7 @@ export default function Show({
             canonical={item.url}
             type="article"
         >
-            <div className="mx-auto w-full max-w-3xl px-6 py-16">
+            <div className="mx-auto w-full max-w-3xl px-6 py-28">
                 <Link
                     href={route('roadmap.index')}
                     data-testid="back-to-roadmap"
