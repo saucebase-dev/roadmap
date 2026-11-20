@@ -3,14 +3,17 @@
 namespace Modules\Roadmap\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use InvalidArgumentException;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Models\RoadmapItem;
+use Modules\Roadmap\Notifications\RoadmapItemMergedNotification;
 
 /**
  * Fold a duplicate into another item: its votes and comments move across, and it is
  * closed. A vote from someone who voted on both is dropped, as the unique index would
- * reject it.
+ * reject it. Its voters and author are told where it went, once the merge commits; its
+ * address redirects there (RoadmapController::show()).
  */
 class MergeItem
 {
@@ -19,6 +22,14 @@ class MergeItem
         if ($target->is($duplicate)) {
             throw new InvalidArgumentException('An item cannot be merged into itself.');
         }
+
+        // Voters follow their votes and the mail names the target, so it must be one they can see.
+        if (! $target->isPublic()) {
+            throw new InvalidArgumentException('An item can only be merged into a public one.');
+        }
+
+        // Read before the votes move: afterwards the duplicate has no voters.
+        $subscribers = $duplicate->subscribers();
 
         DB::transaction(function () use ($duplicate, $target): void {
             $duplicate->votes()->whereIn('user_id', $target->votes()->pluck('user_id'))->delete();
@@ -31,5 +42,7 @@ class MergeItem
                 'status' => RoadmapStatus::Closed,
             ]);
         });
+
+        Notification::send($subscribers, (new RoadmapItemMergedNotification($duplicate, $target))->afterCommit());
     }
 }
