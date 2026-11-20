@@ -28,10 +28,15 @@ class MergeItem
             throw new InvalidArgumentException('An item can only be merged into a public one.');
         }
 
-        // Read before the votes move: afterwards the duplicate has no voters.
-        $subscribers = $duplicate->subscribers();
+        $subscribers = DB::transaction(function () use ($duplicate, $target) {
+            // Locked and read again: a double click, or two admins at once, merges it once.
+            if (RoadmapItem::lockForUpdate()->find($duplicate->getKey())?->merged_into_id !== null) {
+                return null;
+            }
 
-        DB::transaction(function () use ($duplicate, $target): void {
+            // Read before the votes move: afterwards the duplicate has no voters.
+            $subscribers = $duplicate->subscribers();
+
             $duplicate->votes()->whereIn('user_id', $target->votes()->pluck('user_id'))->delete();
             $duplicate->votes()->update(['roadmap_item_id' => $target->getKey()]);
             // The relation is ordered, and an ordered UPDATE is not portable.
@@ -41,8 +46,12 @@ class MergeItem
                 'merged_into_id' => $target->getKey(),
                 'status' => RoadmapStatus::Closed,
             ]);
+
+            return $subscribers;
         });
 
-        Notification::send($subscribers, (new RoadmapItemMergedNotification($duplicate, $target))->afterCommit());
+        if ($subscribers !== null) {
+            Notification::send($subscribers, (new RoadmapItemMergedNotification($duplicate, $target))->afterCommit());
+        }
     }
 }

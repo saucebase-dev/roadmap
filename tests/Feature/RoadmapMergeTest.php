@@ -4,12 +4,12 @@ namespace Modules\Roadmap\Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Modules\Roadmap\Actions\MergeItem;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Models\RoadmapItem;
 use Modules\Roadmap\Notifications\RoadmapItemMergedNotification;
 use Modules\Roadmap\Notifications\RoadmapItemStatusChangedNotification;
-use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class RoadmapMergeTest extends TestCase
@@ -92,6 +92,21 @@ class RoadmapMergeTest extends TestCase
     }
 
     /** Their vote moved: voters and the author hear where, once, and nothing about "Closed". */
+    /** A double click, or two admins at once: the second merge finds it merged and tells no one again. */
+    public function test_a_second_merge_of_the_same_item_changes_nothing(): void
+    {
+        Notification::fake();
+        $author = User::factory()->create();
+        $duplicate = RoadmapItem::factory()->planned()->create(['user_id' => $author->id]);
+        $target = RoadmapItem::factory()->planned()->create();
+        $stale = RoadmapItem::find($duplicate->id);
+
+        app(MergeItem::class)->handle($duplicate, $target);
+        app(MergeItem::class)->handle($stale, $target);
+
+        Notification::assertSentToTimes($author, RoadmapItemMergedNotification::class, 1);
+    }
+
     public function test_voters_and_the_author_are_told_where_it_went(): void
     {
         Notification::fake();

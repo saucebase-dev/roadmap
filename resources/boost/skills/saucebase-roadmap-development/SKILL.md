@@ -67,6 +67,7 @@ Moderation hides rather than deletes: `hidden_at` plus a private `hidden_reason`
 
 - **The source's address redirects** (301, as a merge cannot be undone) to the target: `RoadmapController::show()`, before the visibility check, so shared links and "My feedback" still reach the conversation. The target's own rules apply there.
 - **Only into a public item:** voters follow their votes and the mail names the target. `MergeItem` throws otherwise, and the admin picker lists public items only.
+- **Once only:** the source is locked and read again inside the transaction; a double click or a second admin finds it merged and changes and sends nothing.
 - **Its subscribers hear where it went:** `RoadmapItemMergedNotification` to the source's voters and author, read before the votes move, sent after commit. A merge sends no `StatusChanged` mail: closing the source is not a rejection (the `updated` hook skips a status change that comes with `merged_into_id`).
 
 ### Notifications Go To Everyone Waiting
