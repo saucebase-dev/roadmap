@@ -90,6 +90,8 @@ class RoadmapItemsTable
                     ->getSearchResultsUsing(fn (RoadmapItem $record, string $search) => RoadmapItem::query()
                         ->whereKeyNot($record->getKey())
                         ->whereNull('merged_into_id')
+                        // Only what visitors can see: MergeItem refuses anything else.
+                        ->whereIn('status', RoadmapStatus::publicStatuses())
                         ->where('title', 'like', "%{$search}%")
                         ->orderBy('title')
                         ->limit(50)

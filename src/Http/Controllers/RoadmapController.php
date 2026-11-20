@@ -67,8 +67,14 @@ class RoadmapController
      * package would otherwise treat any ordinary link as "open me over the
      * previous page", and a shared link has to stay a real page.
      */
-    public function show(RoadmapItem $item, RoadmapSettings $settings): Response|Modal
+    public function show(RoadmapItem $item, RoadmapSettings $settings): Response|Modal|RedirectResponse
     {
+        // Merged away: its votes and comments live on the target now, whose own rules apply.
+        // Permanent, as a merge cannot be undone.
+        if ($item->mergedInto !== null) {
+            return redirect($item->mergedInto->url(), 301);
+        }
+
         // 404 and not 403: a refusal would confirm that a hidden item exists.
         abort_unless(Gate::allows('view', $item), 404);
 
