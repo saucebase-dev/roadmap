@@ -54,7 +54,8 @@ class RoadmapItem extends Model implements Sitemapable
         });
 
         static::updated(function (RoadmapItem $item): void {
-            if ($item->wasChanged('status')) {
+            // A merge closes the duplicate, but it isn't a rejection: MergeItem sends its own mail.
+            if ($item->wasChanged('status') && ! $item->wasChanged('merged_into_id')) {
                 StatusChanged::dispatch($item);
             }
         });

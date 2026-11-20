@@ -7,8 +7,10 @@ use Illuminate\Database\Seeder;
 use Modules\Roadmap\Enums\RoadmapStatus;
 use Modules\Roadmap\Enums\RoadmapType;
 use Modules\Roadmap\Models\RoadmapItem;
+use Saucebase\Core\Attributes\DemoAccount;
 use Spatie\Permission\Models\Role;
 
+#[DemoAccount('roadmap@saucebase.dev', 'staff: the roadmap admin')]
 class ShowcaseRoadmapDatabaseSeeder extends Seeder
 {
     public function run(): void
