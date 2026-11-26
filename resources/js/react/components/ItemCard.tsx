@@ -21,7 +21,8 @@ export default function ItemCard({
     /** Own submissions are listed off the board, where the column no longer says the status. */
     showStatus?: boolean;
     votePending?: boolean;
-    onVote: (item: RoadmapItem) => void;
+    /** Asks for a vote on the item; whoever shows the card counts it. */
+    onVote?: (item: RoadmapItem) => void;
 }) {
     const t = useT();
 
@@ -35,7 +36,7 @@ export default function ItemCard({
                 votes={item.votes_count}
                 voted={item.has_voted}
                 pending={votePending || !item.votable}
-                onVote={() => onVote(item)}
+                onVote={() => onVote?.(item)}
             />
 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
