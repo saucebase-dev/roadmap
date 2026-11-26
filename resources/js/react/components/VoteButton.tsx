@@ -14,7 +14,8 @@ export default function VoteButton({
     votes: number;
     voted: boolean;
     pending?: boolean;
-    onVote: () => void;
+    /** Asks for the vote; whoever shows the button counts it. */
+    onVote?: () => void;
 }) {
     const t = useT();
 
@@ -34,7 +35,7 @@ export default function VoteButton({
             )}
             onClick={(event) => {
                 event.preventDefault();
-                onVote();
+                onVote?.();
             }}
         >
             <IconAltArrowUpBold className="size-5" />
